@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { loginUserClient } from "../../../lib/auth";
 import {
   Sprout,
   User,
@@ -13,10 +15,71 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
-const RegisterPage = () => {
+const RegisterFormContent = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] =
     useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+
+  const handleRegister = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError(null);
+    const formData = new FormData(e.currentTarget);
+    const name = formData.get("name") as string;
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+    const confirmPassword = formData.get("confirmPassword") as string;
+
+    if (!name || !email || !password || !confirmPassword) {
+      setError("Please fill in all fields.");
+      return;
+    }
+
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    try {
+      const storedUsers = localStorage.getItem("registered_users");
+      const users = storedUsers ? JSON.parse(storedUsers) : [];
+
+      const userExists = users.some(
+        (u: any) => u.email.toLowerCase() === email.toLowerCase()
+      );
+      if (userExists) {
+        setError("An account with this email already exists.");
+        return;
+      }
+
+      const newUser = {
+        name,
+        email,
+        password,
+        role: "Farmer" as const,
+      };
+      users.push(newUser);
+      localStorage.setItem("registered_users", JSON.stringify(users));
+
+      loginUserClient({
+        name: newUser.name,
+        email: newUser.email,
+        role: newUser.role,
+      });
+
+      router.push("/dashboard");
+      router.refresh();
+    } catch (err) {
+      setError("An error occurred during registration. Please try again.");
+      console.error(err);
+    }
+  };
 
   return (
     <main className="min-h-screen bg-[#FAF8F3] px-4 py-10">
@@ -146,16 +209,26 @@ const RegisterPage = () => {
                 </p>
               </div>
 
+              {/* Error Alert */}
+              {error && (
+                <div 
+                  className="mb-5 rounded-xl p-3.5 text-sm font-medium"
+                  style={{
+                    backgroundColor: "#FDF2F2",
+                    border: "1px solid #FDE8E8",
+                    color: "#9B1C1C",
+                  }}
+                >
+                  {error}
+                </div>
+              )}
+
               {/* =================================================
                   REGISTER FORM
               ================================================= */}
 
               <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-
-                  console.log("Registration submitted");
-                }}
+                onSubmit={handleRegister}
                 className="space-y-5"
               >
 
@@ -391,6 +464,21 @@ const RegisterPage = () => {
         </div>
       </div>
     </main>
+  );
+};
+
+const RegisterPage = () => {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center bg-[#FAF8F3]">
+        <div className="text-center">
+          <Sprout className="mx-auto h-12 w-12 animate-pulse text-[#1F3D2B]" />
+          <p className="mt-4 text-sm font-medium text-[#6B7A6E]">Loading AgriTech...</p>
+        </div>
+      </div>
+    }>
+      <RegisterFormContent />
+    </Suspense>
   );
 };
 

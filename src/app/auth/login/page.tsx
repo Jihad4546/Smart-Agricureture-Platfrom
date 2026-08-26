@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { loginUserClient, DEFAULT_USERS } from "../../../lib/auth";
 import {
   Sprout,
   Mail,
@@ -11,8 +13,71 @@ import {
   ArrowRight,
 } from "lucide-react";
 
-const LoginPage = () => {
+const LoginFormContent = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectUrl = searchParams.get("redirect") || "/dashboard";
+
+  const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError(null);
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+
+    if (!email || !password) {
+      setError("Please fill in all fields.");
+      return;
+    }
+
+    // 1. Check default hardcoded users
+    let matchedUser = DEFAULT_USERS[email.toLowerCase()];
+    
+    // 2. Check registered users in localStorage
+    if (!matchedUser) {
+      try {
+        const storedUsers = localStorage.getItem("registered_users");
+        if (storedUsers) {
+          const users = JSON.parse(storedUsers);
+          const found = users.find(
+            (u: any) => u.email.toLowerCase() === email.toLowerCase() && u.password === password
+          );
+          if (found) {
+            matchedUser = {
+              name: found.name,
+              email: found.email,
+              role: found.role || "Farmer",
+            };
+          }
+        }
+      } catch (err) {
+        console.error("Failed to read registered users", err);
+      }
+    } else {
+      // Check password for default user
+      if (matchedUser.password !== password) {
+        matchedUser = undefined;
+      }
+    }
+
+    if (!matchedUser) {
+      setError("Invalid email or password.");
+      return;
+    }
+
+    // Success! Log in
+    loginUserClient({
+      name: matchedUser.name,
+      email: matchedUser.email,
+      role: matchedUser.role,
+    });
+
+    // Redirect and refresh
+    router.push(redirectUrl);
+    router.refresh();
+  };
 
   return (
     <main className="min-h-screen bg-[#FAF8F3] px-4 py-10">
@@ -97,12 +162,23 @@ const LoginPage = () => {
                 </p>
               </div>
 
+              {/* Error Alert */}
+              {error && (
+                <div 
+                  className="mb-5 rounded-xl p-3.5 text-sm font-medium"
+                  style={{
+                    backgroundColor: "#FDF2F2",
+                    border: "1px solid #FDE8E8",
+                    color: "#9B1C1C",
+                  }}
+                >
+                  {error}
+                </div>
+              )}
+
               {/* Form */}
               <form
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  console.log("Login submitted");
-                }}
+                onSubmit={handleLogin}
                 className="space-y-5"
               >
                 {/* Email */}
@@ -231,6 +307,21 @@ const LoginPage = () => {
         </div>
       </div>
     </main>
+  );
+};
+
+const LoginPage = () => {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-screen items-center justify-center bg-[#FAF8F3]">
+        <div className="text-center">
+          <Sprout className="mx-auto h-12 w-12 animate-pulse text-[#1F3D2B]" />
+          <p className="mt-4 text-sm font-medium text-[#6B7A6E]">Loading AgriTech...</p>
+        </div>
+      </div>
+    }>
+      <LoginFormContent />
+    </Suspense>
   );
 };
 

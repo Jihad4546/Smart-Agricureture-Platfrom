@@ -2,6 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { getAuthUserClient, logoutUserClient, User } from "../../lib/auth";
+import styles from "./Navbar.module.css";
 import {
   Sprout,
   Menu,
@@ -54,14 +57,6 @@ type MenuGroup = {
 ========================================================= */
 
 const menuGroups: MenuGroup[] = [
-  {
-    key: "dashboard",
-    bn: "ড্যাশবোর্ড",
-    en: "Dashboard",
-    icon: LayoutDashboard,
-    href: "/dashboard",
-  },
-
   {
     key: "crop",
     bn: "ফসল ব্যবস্থাপনা",
@@ -168,27 +163,11 @@ const menuGroups: MenuGroup[] = [
   },
 
   {
-    key: "account",
-    bn: "অ্যাকাউন্ট",
-    en: "Account",
+    key: "profile",
+    bn: "প্রোফাইল",
+    en: "Profile",
     icon: UserCircle2,
-    items: [
-      {
-        bn: "নোটিফিকেশন",
-        en: "Notifications",
-        href: "/profile",
-      },
-      {
-        bn: "প্রোফাইল",
-        en: "Profile",
-        href: "/profile",
-      },
-      {
-        bn: "অ্যাডমিন ড্যাশবোর্ড",
-        en: "Admin Dashboard",
-        href: "/admin",
-      },
-    ],
+    href: "/profile",
   },
 ];
 
@@ -218,12 +197,6 @@ const itemIcons: Record<string, React.ElementType[]> = {
     PackageSearch,
     ShoppingCart,
     ClipboardList,
-  ],
-
-  account: [
-    Bell,
-    UserCircle2,
-    Shield,
   ],
 };
 
@@ -279,10 +252,16 @@ export default function AgriTechNavbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [mobileMenu, setMobileMenu] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const router = useRouter();
 
   const navRef = useRef<HTMLElement>(null);
 
   const t = text[lang];
+
+  useEffect(() => {
+    setUser(getAuthUserClient());
+  }, []);
 
   /* =======================================================
      SCROLL
@@ -441,7 +420,7 @@ export default function AgriTechNavbar() {
             <Link
               href="/"
               onClick={closeAll}
-              className="nav-link"
+              className={styles.navLink}
               style={{
                 color: colors.text,
               }}
@@ -462,7 +441,7 @@ export default function AgriTechNavbar() {
                     key={group.key}
                     href={group.href}
                     onClick={closeAll}
-                    className="nav-link flex items-center gap-1"
+                    className={`${styles.navLink} flex items-center gap-1`}
                     style={{
                       color: colors.text,
                     }}
@@ -487,7 +466,7 @@ export default function AgriTechNavbar() {
                     onClick={() =>
                       toggleDesktopMenu(group.key)
                     }
-                    className="nav-button flex items-center gap-1"
+                    className={`${styles.navButton} flex items-center gap-1`}
                     style={{
                       color: isOpen
                         ? colors.green
@@ -542,7 +521,7 @@ export default function AgriTechNavbar() {
                               }
                               href={item.href}
                               onClick={closeAll}
-                              className="dropdown-link"
+                              className={styles.dropdownLink}
                             >
                               <span
                                 className="flex h-8 w-8 items-center justify-center rounded-lg"
@@ -582,7 +561,7 @@ export default function AgriTechNavbar() {
             <button
               type="button"
               onClick={toggleLanguage}
-              className="action-button"
+              className={styles.actionButton}
               style={{
                 color: colors.muted,
               }}
@@ -591,27 +570,56 @@ export default function AgriTechNavbar() {
               {t.language}
             </button>
 
-            {/* Login */}
+            {!user ? (
+              <>
+                {/* Login */}
+                <Link
+                  href="/auth/login"
+                  onClick={closeAll}
+                  className={styles.loginButton}
+                >
+                  <LogIn size={14} />
+                  {t.login}
+                </Link>
 
-            <Link
-              href="/auth/login"
-              onClick={closeAll}
-              className="login-button"
-            >
-              <LogIn size={14} />
-              {t.login}
-            </Link>
+                {/* Register */}
+                <Link
+                  href="/auth/register"
+                  onClick={closeAll}
+                  className={styles.registerButton}
+                >
+                  <UserPlus size={14} />
+                  {t.register}
+                </Link>
+              </>
+            ) : (
+              <>
+                {/* User badge */}
+                <span className="text-xs font-semibold text-[#1F3D2B] bg-[#EAF0E8] px-3 py-1.5 rounded-xl border border-[#E4DFD1] flex items-center gap-1.5">
+                  <UserCircle2 size={14} />
+                  {user.name} ({lang === "bn" ? (user.role === "Admin" ? "অ্যাডমিন" : "কৃষক") : user.role})
+                </span>
 
-            {/* Register */}
-
-            <Link
-              href="/auth/register"
-              onClick={closeAll}
-              className="register-button"
-            >
-              <UserPlus size={14} />
-              {t.register}
-            </Link>
+                {/* Logout */}
+                <button
+                  onClick={() => {
+                    logoutUserClient();
+                    setUser(null);
+                    closeAll();
+                    router.push("/");
+                    router.refresh();
+                  }}
+                  className={styles.registerButton}
+                  style={{
+                    backgroundColor: "#9B1C1C",
+                    borderColor: "#9B1C1C",
+                  }}
+                >
+                  <LogIn size={14} style={{ transform: "rotate(180deg)" }} />
+                  {lang === "bn" ? "লগ আউট" : "Log out"}
+                </button>
+              </>
+            )}
           </div>
 
           {/* =================================================
@@ -662,7 +670,7 @@ export default function AgriTechNavbar() {
             <Link
               href="/"
               onClick={closeAll}
-              className="mobile-link"
+              className={styles.mobileLink}
             >
               <Sprout size={16} />
               {t.home}
@@ -684,7 +692,7 @@ export default function AgriTechNavbar() {
                     key={group.key}
                     href={group.href}
                     onClick={closeAll}
-                    className="mobile-link"
+                    className={styles.mobileLink}
                   >
                     <Icon size={16} />
                     {label}
@@ -799,29 +807,58 @@ export default function AgriTechNavbar() {
               <button
                 type="button"
                 onClick={toggleLanguage}
-                className="action-button flex-1 justify-center"
+                className={`${styles.actionButton} flex-1 justify-center`}
               >
                 <Globe size={14} />
                 {t.language}
               </button>
 
-              <Link
-                href="/auth/login"
-                onClick={closeAll}
-                className="login-button flex-1 justify-center"
-              >
-                <LogIn size={14} />
-                {t.login}
-              </Link>
+              {!user ? (
+                <>
+                  <Link
+                    href="/auth/login"
+                    onClick={closeAll}
+                    className={`${styles.loginButton} flex-1 justify-center`}
+                  >
+                    <LogIn size={14} />
+                    {t.login}
+                  </Link>
 
-              <Link
-                href="/auth/register"
-                onClick={closeAll}
-                className="register-button flex-1 justify-center"
-              >
-                <UserPlus size={14} />
-                {t.register}
-              </Link>
+                  <Link
+                    href="/auth/register"
+                    onClick={closeAll}
+                    className={`${styles.registerButton} flex-1 justify-center`}
+                  >
+                    <UserPlus size={14} />
+                    {t.register}
+                  </Link>
+                </>
+              ) : (
+                <div className="flex flex-col gap-2 w-full">
+                  <span className="text-xs font-semibold text-[#1F3D2B] bg-[#EAF0E8] px-3 py-2 rounded-xl border border-[#E4DFD1] text-center flex items-center justify-center gap-1.5">
+                    <UserCircle2 size={14} />
+                    {user.name} ({lang === "bn" ? (user.role === "Admin" ? "অ্যাডমিন" : "কৃষক") : user.role})
+                  </span>
+                  
+                  <button
+                    onClick={() => {
+                      logoutUserClient();
+                      setUser(null);
+                      closeAll();
+                      router.push("/");
+                      router.refresh();
+                    }}
+                    className={`${styles.registerButton} justify-center w-full`}
+                    style={{
+                      backgroundColor: "#9B1C1C",
+                      borderColor: "#9B1C1C",
+                    }}
+                  >
+                    <LogIn size={14} style={{ transform: "rotate(180deg)" }} />
+                    {lang === "bn" ? "লগ আউট" : "Log out"}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -831,153 +868,7 @@ export default function AgriTechNavbar() {
           LIGHTWEIGHT CSS
       ================================================= */}
 
-      <style jsx>{`
-        .nav-link {
-          position: relative;
-          display: flex;
-          align-items: center;
-          gap: 4px;
-          padding: 6px 2px;
-          font-size: 14px;
-          font-weight: 500;
-          text-decoration: none;
-          transition:
-            transform 180ms ease,
-            color 180ms ease;
-        }
 
-        .nav-link::after {
-          content: "";
-          position: absolute;
-          left: 2px;
-          right: 2px;
-          bottom: 0;
-          height: 2px;
-          border-radius: 99px;
-          background: ${colors.gold};
-          transform: scaleX(0);
-          transform-origin: left;
-          transition: transform 180ms ease;
-        }
-
-        .nav-link:hover {
-          transform: translateY(-1px);
-          color: ${colors.green} !important;
-        }
-
-        .nav-link:hover::after {
-          transform: scaleX(1);
-        }
-
-        .nav-button {
-          position: relative;
-          border: none;
-          background: transparent;
-          padding: 6px 2px;
-          font-size: 14px;
-          font-weight: 500;
-          cursor: pointer;
-          transition:
-            transform 180ms ease,
-            color 180ms ease;
-        }
-
-        .nav-button:hover {
-          transform: translateY(-1px);
-          color: ${colors.green} !important;
-        }
-
-        .dropdown-link {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          width: 100%;
-          padding: 9px;
-          border-radius: 11px;
-          color: ${colors.text};
-          text-decoration: none;
-          font-size: 13px;
-          transition:
-            background 150ms ease,
-            transform 150ms ease;
-        }
-
-        .dropdown-link:hover {
-          background: ${colors.greenSoft};
-          transform: translateX(3px);
-        }
-
-        .action-button,
-        .login-button,
-        .register-button {
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          min-height: 34px;
-          padding: 7px 11px;
-          border-radius: 10px;
-          font-size: 13px;
-          text-decoration: none;
-          transition:
-            transform 180ms ease,
-            box-shadow 180ms ease;
-        }
-
-        .action-button {
-          border: 1px solid ${colors.border};
-          background: ${colors.cream};
-          cursor: pointer;
-        }
-
-        .login-button {
-          border: 1px solid ${colors.border};
-          background: ${colors.white};
-          color: ${colors.text};
-        }
-
-        .register-button {
-          border: none;
-          background: linear-gradient(
-            145deg,
-            #f0b76a,
-            ${colors.gold}
-          );
-          color: ${colors.green};
-          font-weight: 700;
-          cursor: pointer;
-          box-shadow:
-            0 6px 12px -8px
-            rgba(198, 134, 58, 0.8);
-        }
-
-        .action-button:hover,
-        .login-button:hover,
-        .register-button:hover {
-          transform: translateY(-1px);
-        }
-
-        .mobile-link {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          width: 100%;
-          padding: 12px 8px;
-          border-top: 1px solid ${colors.border};
-          color: ${colors.text};
-          text-decoration: none;
-          font-size: 14px;
-        }
-
-        @media (max-width: 380px) {
-          .register-button,
-          .login-button,
-          .action-button {
-            padding-left: 7px;
-            padding-right: 7px;
-            font-size: 12px;
-          }
-        }
-      `}</style>
 
       {/* Navbar spacer */}
 
