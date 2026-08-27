@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+:root {
+  --background: #FAF8F3;
+  --foreground: #16241C;
+  --primary: #1F3D2B;
+  --primary-light: #2F5943;
+  --primary-soft: #EAF0E8;
+  --accent: #E0A458;
+  --border: #E4DFD1;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-noto-bengali), var(--font-inter), 'Hind Siliguri', sans-serif;
+  --font-inter: var(--font-inter), sans-serif;
+  --font-bengali: var(--font-noto-bengali), 'Hind Siliguri', sans-serif;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-noto-bengali), var(--font-inter), 'Hind Siliguri', sans-serif;
+}
