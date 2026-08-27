@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import "./globals.css";
+import "../globals.css";
 import AgriTechNavbar from "../../components/navbar/Navbar";
 import BottomNav from "../../components/navbar/BottomNav";
 import { LanguageProvider } from "../../contexts/LanguageContext";
