@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { getAuthUserClient, logoutUserClient, User } from "../../../lib/auth";
+import { useLanguage } from "../../../contexts/LanguageContext";
 import {
   Sprout,
   User as UserIcon,
@@ -13,8 +14,35 @@ import {
   Calendar,
 } from "lucide-react";
 
+const translations = {
+  en: {
+    backToDashboard: "Back to Dashboard",
+    loadingProfile: "Loading Profile...",
+    accountRole: (role: string) => `${role} Account`,
+    emailAddress: "Email Address",
+    accessLevel: "Access Level",
+    privilege: (role: string) => `${role} Privilege`,
+    memberSince: "Member Since",
+    memberDate: "August 2026",
+    logoutBtn: "Logout from Account",
+  },
+  bn: {
+    backToDashboard: "ড্যাশবোর্ডে ফিরে যান",
+    loadingProfile: "প্রোফাইল লোড হচ্ছে...",
+    accountRole: (role: string) => `${role === "Admin" ? "অ্যাডমিন" : "কৃষক"} অ্যাকাউন্ট`,
+    emailAddress: "ইমেইল ঠিকানা",
+    accessLevel: "অ্যাক্সেস লেভেল",
+    privilege: (role: string) => `${role === "Admin" ? "অ্যাডমিন" : "কৃষক"} অধিকার`,
+    memberSince: "সদস্যপদ শুরু",
+    memberDate: "আগস্ট ২০২৬",
+    logoutBtn: "অ্যাকাউন্ট থেকে লগ আউট",
+  }
+};
+
 export default function ProfilePage() {
   const router = useRouter();
+  const { lang } = useLanguage();
+  const t = translations[lang];
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
@@ -37,7 +65,7 @@ export default function ProfilePage() {
       <div className="flex min-h-screen items-center justify-center bg-[#FAF8F3]">
         <div className="text-center">
           <Sprout className="mx-auto h-12 w-12 animate-pulse text-[#1F3D2B]" />
-          <p className="mt-4 text-sm font-medium text-[#6B7A6E]">Loading Profile...</p>
+          <p className="mt-4 text-sm font-medium text-[#6B7A6E]">{t.loadingProfile}</p>
         </div>
       </div>
     );
@@ -51,7 +79,7 @@ export default function ProfilePage() {
           className="mb-6 flex items-center gap-2 text-sm font-semibold text-[#1F3D2B] transition hover:text-[#2F5943]"
         >
           <ArrowLeft size={16} />
-          Back to Dashboard
+          {t.backToDashboard}
         </button>
 
         <div className="overflow-hidden rounded-3xl border border-[#E4DFD1] bg-white shadow-sm">
@@ -67,7 +95,7 @@ export default function ProfilePage() {
             <div className="mb-6 border-b border-[#E4DFD1] pb-6">
               <h1 className="text-2xl font-bold text-[#16241C]">{user.name}</h1>
               <p className="text-sm font-medium text-[#C6863A] uppercase tracking-wider mt-1">
-                {user.role} Account
+                {t.accountRole(user.role)}
               </p>
             </div>
 
@@ -76,7 +104,7 @@ export default function ProfilePage() {
                 <Mail size={18} className="text-[#1F3D2B]" />
                 <div>
                   <span className="block text-[11px] font-semibold text-[#16241C] uppercase">
-                    Email address
+                    {t.emailAddress}
                   </span>
                   <span>{user.email}</span>
                 </div>
@@ -86,9 +114,9 @@ export default function ProfilePage() {
                 <Shield size={18} className="text-[#1F3D2B]" />
                 <div>
                   <span className="block text-[11px] font-semibold text-[#16241C] uppercase">
-                    Access Level
+                    {t.accessLevel}
                   </span>
-                  <span>{user.role} Privilege</span>
+                  <span>{t.privilege(user.role)}</span>
                 </div>
               </div>
 
@@ -96,19 +124,19 @@ export default function ProfilePage() {
                 <Calendar size={18} className="text-[#1F3D2B]" />
                 <div>
                   <span className="block text-[11px] font-semibold text-[#16241C] uppercase">
-                    Member Since
+                    {t.memberSince}
                   </span>
-                  <span>August 2026</span>
+                  <span>{t.memberDate}</span>
                 </div>
               </div>
             </div>
 
             <button
               onClick={handleLogout}
-              className="flex w-full h-12 items-center justify-center gap-2 rounded-xl bg-[#9B1C1C] text-sm font-semibold text-white transition hover:bg-[#B82525]"
+              className="flex w-full h-12 items-center justify-center gap-2 rounded-xl bg-[#9B1C1C] text-sm font-semibold text-white transition hover:bg-[#B82525] shadow-lg shadow-red-900/10"
             >
               <LogOut size={16} />
-              Logout from Account
+              {t.logoutBtn}
             </button>
           </div>
         </div>

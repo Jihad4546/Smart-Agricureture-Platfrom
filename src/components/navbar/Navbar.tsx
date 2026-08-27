@@ -3,14 +3,22 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { getAuthUserClient, logoutUserClient, User } from "../../lib/auth";
+
+import {
+  getAuthUserClient,
+  logoutUserClient,
+  User,
+} from "../../lib/auth";
+
+import { useLanguage } from "../../contexts/LanguageContext";
+
 import styles from "./Navbar.module.css";
+
 import {
   Sprout,
   Menu,
   X,
   ChevronDown,
-  LayoutDashboard,
   Wheat,
   CloudSun,
   PawPrint,
@@ -24,18 +32,11 @@ import {
   PackageSearch,
   ShoppingCart,
   ClipboardList,
-  Bell,
-  Shield,
   LogIn,
   UserPlus,
   Globe,
+  LayoutDashboard,
 } from "lucide-react";
-
-/* =========================================================
-   TYPES
-========================================================= */
-
-type Lang = "bn" | "en";
 
 type MenuItem = {
   bn: string;
@@ -47,14 +48,10 @@ type MenuGroup = {
   key: string;
   bn: string;
   en: string;
-  icon: React.ElementType;
+  icon: any;
   items?: MenuItem[];
   href?: string;
 };
-
-/* =========================================================
-   MENU DATA
-========================================================= */
 
 const menuGroups: MenuGroup[] = [
   {
@@ -167,15 +164,22 @@ const menuGroups: MenuGroup[] = [
     bn: "প্রোফাইল",
     en: "Profile",
     icon: UserCircle2,
-    href: "/profile",
+    items: [
+      {
+        bn: "প্রোফাইল",
+        en: "Profile",
+        href: "/profile",
+      },
+      {
+        bn: "ড্যাশবোর্ড",
+        en: "Dashboard",
+        href: "/dashboard",
+      },
+    ],
   },
 ];
 
-/* =========================================================
-   DROPDOWN ICONS
-========================================================= */
-
-const itemIcons: Record<string, React.ElementType[]> = {
+const itemIcons: Record<string, any[]> = {
   crop: [
     Wheat,
     Sprout,
@@ -198,115 +202,118 @@ const itemIcons: Record<string, React.ElementType[]> = {
     ShoppingCart,
     ClipboardList,
   ],
+
+  profile: [
+    UserCircle2,
+    LayoutDashboard,
+  ],
 };
-
-/* =========================================================
-   COLORS
-========================================================= */
-
-const colors = {
-  green: "#1F3D2B",
-  greenLight: "#2F5943",
-  greenSoft: "#EAF0E8",
-
-  gold: "#E0A458",
-  goldDark: "#C6863A",
-
-  cream: "#FAF8F3",
-  white: "#FFFFFF",
-
-  text: "#16241C",
-  muted: "#6B7A6E",
-  border: "#E4DFD1",
-};
-
-/* =========================================================
-   TRANSLATIONS
-========================================================= */
-
-const text = {
-  bn: {
-    brand: "এগ্রিটেক",
-    home: "হোম",
-    login: "লগ ইন",
-    register: "নিবন্ধন",
-    language: "EN",
-  },
-
-  en: {
-    brand: "AgriTech",
-    home: "Home",
-    login: "Log in",
-    register: "Register",
-    language: "বাং",
-  },
-};
-
-/* =========================================================
-   NAVBAR
-========================================================= */
 
 export default function AgriTechNavbar() {
-  const [lang, setLang] = useState<Lang>("bn");
-  const [openMenu, setOpenMenu] = useState<string | null>(null);
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [mobileMenu, setMobileMenu] = useState<string | null>(null);
-  const [scrolled, setScrolled] = useState(false);
-  const [user, setUser] = useState<User | null>(null);
+  const [openMenu, setOpenMenu] =
+    useState<string | null>(null);
+
+  const [mobileOpen, setMobileOpen] =
+    useState(false);
+
+  const [mobileMenu, setMobileMenu] =
+    useState<string | null>(null);
+
+  const [scrolled, setScrolled] =
+    useState(false);
+
+  const [user, setUser] =
+    useState<User | null>(null);
+
   const router = useRouter();
 
-  const navRef = useRef<HTMLElement>(null);
+  const navRef =
+    useRef<HTMLElement>(null);
 
-  const t = text[lang];
+  /* ================================
+     GLOBAL LANGUAGE
+  ================================= */
+
+  const {
+    lang,
+    toggleLang,
+    t: translation,
+  } = useLanguage();
+
+  const t = translation.nav;
+
+  /* ================================
+     AUTH USER
+  ================================= */
 
   useEffect(() => {
-    setUser(getAuthUserClient());
+    const currentUser =
+      getAuthUserClient();
+
+    setUser(currentUser);
   }, []);
 
-  /* =======================================================
+  /* ================================
      SCROLL
-  ======================================================= */
+  ================================= */
 
   useEffect(() => {
     const handleScroll = () => {
-      setScrolled(window.scrollY > 15);
+      setScrolled(
+        window.scrollY > 15
+      );
     };
 
-    window.addEventListener("scroll", handleScroll, {
-      passive: true,
-    });
+    window.addEventListener(
+      "scroll",
+      handleScroll,
+      { passive: true }
+    );
 
     handleScroll();
 
     return () => {
-      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener(
+        "scroll",
+        handleScroll
+      );
     };
   }, []);
 
-  /* =======================================================
+  /* ================================
      OUTSIDE CLICK
-  ======================================================= */
+  ================================= */
 
   useEffect(() => {
-    const handleClick = (event: MouseEvent) => {
+    const handleClick = (
+      event: MouseEvent
+    ) => {
       if (
         navRef.current &&
-        !navRef.current.contains(event.target as Node)
+        !navRef.current.contains(
+          event.target as Node
+        )
       ) {
         setOpenMenu(null);
       }
     };
 
-    document.addEventListener("mousedown", handleClick);
+    document.addEventListener(
+      "mousedown",
+      handleClick
+    );
 
     return () => {
-      document.removeEventListener("mousedown", handleClick);
+      document.removeEventListener(
+        "mousedown",
+        handleClick
+      );
     };
   }, []);
 
-  /* =======================================================
-     HELPERS
-  ======================================================= */
+  /* ================================
+     CLOSE
+  ================================= */
 
   const closeAll = () => {
     setOpenMenu(null);
@@ -314,22 +321,48 @@ export default function AgriTechNavbar() {
     setMobileMenu(null);
   };
 
+  /* ================================
+     LANGUAGE
+  ================================= */
+
   const toggleLanguage = () => {
-    setLang((current) =>
-      current === "bn" ? "en" : "bn"
-    );
+    toggleLang();
 
     setOpenMenu(null);
     setMobileMenu(null);
   };
 
-  const toggleDesktopMenu = (key: string) => {
+  /* ================================
+     LOGOUT
+  ================================= */
+
+  const handleLogout = () => {
+    logoutUserClient();
+
+    setUser(null);
+
+    closeAll();
+
+    router.push("/");
+
+    router.refresh();
+  };
+
+  /* ================================
+     MENU TOGGLE
+  ================================= */
+
+  const toggleDesktopMenu = (
+    key: string
+  ) => {
     setOpenMenu((current) =>
       current === key ? null : key
     );
   };
 
-  const toggleMobileMenu = (key: string) => {
+  const toggleMobileMenu = (
+    key: string
+  ) => {
     setMobileMenu((current) =>
       current === key ? null : key
     );
@@ -337,14 +370,23 @@ export default function AgriTechNavbar() {
 
   return (
     <>
-      {/* =================================================
-          NAVBAR
-      ================================================= */}
-
       <nav
         ref={navRef}
         aria-label="Main navigation"
-        className="fixed left-3 right-3 top-3 z-[1000] mx-auto transition-all duration-300 sm:left-5 sm:right-5 lg:left-8 lg:right-8"
+        className="
+          fixed
+          left-3
+          right-3
+          top-3
+          z-[1000]
+          mx-auto
+          transition-all
+          duration-300
+          sm:left-5
+          sm:right-5
+          lg:left-8
+          lg:right-8
+        "
         style={{
           maxWidth: 1240,
 
@@ -352,298 +394,490 @@ export default function AgriTechNavbar() {
             ? "rgba(255,255,255,0.94)"
             : "rgba(255,255,255,0.88)",
 
-          border: `1px solid ${colors.border}`,
+          border:
+            "1px solid #E4DFD1",
 
-          borderRadius: scrolled ? 18 : 22,
+          borderRadius:
+            scrolled ? 18 : 22,
 
-          boxShadow: scrolled
-            ? "0 14px 35px -20px rgba(31,61,43,0.42)"
-            : "0 18px 45px -24px rgba(31,61,43,0.30)",
+          boxShadow:
+            "0 18px 45px -24px rgba(31,61,43,0.30)",
 
-          backdropFilter: "blur(16px)",
+          backdropFilter:
+            "blur(16px)",
 
-          WebkitBackdropFilter: "blur(16px)",
-
-          transform: "translateZ(0)",
+          WebkitBackdropFilter:
+            "blur(16px)",
         }}
       >
+        {/* ================================
+            MAIN NAVBAR
+        ================================= */}
+
         <div
-          className="flex items-center justify-between"
-          style={{
-            minHeight: scrolled ? 60 : 66,
-            padding: "8px 12px 8px 14px",
-          }}
+          className="
+            flex
+            min-h-[66px]
+            items-center
+            justify-between
+            gap-4
+            px-4
+            sm:px-6
+            lg:px-7
+          "
         >
-          {/* =================================================
-              LOGO
-          ================================================= */}
+          {/* LOGO */}
 
           <Link
             href="/"
             onClick={closeAll}
-            className="group flex items-center gap-2.5"
+            className="
+              group
+              flex
+              shrink-0
+              items-center
+              gap-2.5
+            "
             style={{
-              color: colors.green,
+              color: "#1F3D2B",
               textDecoration: "none",
             }}
           >
             <span
-              className="flex h-10 w-10 items-center justify-center rounded-xl transition-transform duration-200 group-hover:-translate-y-1"
+              className="
+                flex
+                h-10
+                w-10
+                items-center
+                justify-center
+                rounded-xl
+                transition-transform
+                duration-200
+                group-hover:-translate-y-1
+              "
               style={{
-                background: `linear-gradient(145deg, ${colors.greenLight}, ${colors.green})`,
-                color: colors.gold,
+                background:
+                  "linear-gradient(145deg,#2F5943,#1F3D2B)",
+
+                color: "#E0A458",
 
                 boxShadow:
-                  "inset 0 1px 1px rgba(255,255,255,0.18), 0 6px 12px -7px rgba(31,61,43,0.7)",
+                  "0 6px 15px -8px rgba(31,61,43,.7)",
               }}
             >
-              <Sprout size={21} strokeWidth={2.2} />
+              <Sprout
+                size={21}
+                strokeWidth={2.2}
+              />
             </span>
 
             <span
-              className="hidden text-xl font-semibold sm:block"
-              style={{
-                color: colors.green,
-              }}
+              className="
+                hidden
+                text-xl
+                font-semibold
+                sm:block
+              "
             >
               {t.brand}
             </span>
           </Link>
 
-          {/* =================================================
-              DESKTOP NAV
-          ================================================= */}
+          {/* ================================
+              DESKTOP MENU
 
-          <div className="hidden items-center gap-4 lg:flex">
-            {/* HOME */}
+              NO HOME HERE
+              NO DASHBOARD HERE
+          ================================= */}
 
-            <Link
-              href="/"
-              onClick={closeAll}
-              className={styles.navLink}
-              style={{
-                color: colors.text,
-              }}
-            >
-              {t.home}
-            </Link>
+          <div
+            className="
+              hidden
+              items-center
+              gap-4
+              lg:flex
+            "
+          >
+            {menuGroups.map(
+              (group) => {
+                const Icon =
+                  group.icon;
 
-            {menuGroups.map((group) => {
-              const Icon = group.icon;
-              const label =
-                lang === "bn" ? group.bn : group.en;
+                const label =
+                  lang === "bn"
+                    ? group.bn
+                    : group.en;
 
-              /* Single link */
+                /* SIMPLE LINK */
 
-              if (group.href) {
-                return (
-                  <Link
-                    key={group.key}
-                    href={group.href}
-                    onClick={closeAll}
-                    className={`${styles.navLink} flex items-center gap-1`}
-                    style={{
-                      color: colors.text,
-                    }}
-                  >
-                    <Icon size={14} />
-                    {label}
-                  </Link>
-                );
-              }
-
-              /* Dropdown */
-
-              const isOpen = openMenu === group.key;
-
-              return (
-                <div
-                  key={group.key}
-                  className="relative"
-                >
-                  <button
-                    type="button"
-                    onClick={() =>
-                      toggleDesktopMenu(group.key)
-                    }
-                    className={`${styles.navButton} flex items-center gap-1`}
-                    style={{
-                      color: isOpen
-                        ? colors.green
-                        : colors.text,
-                    }}
-                  >
-                    <Icon size={14} />
-
-                    {label}
-
-                    <ChevronDown
-                      size={13}
-                      style={{
-                        transform: isOpen
-                          ? "rotate(180deg)"
-                          : "rotate(0)",
-                        transition:
-                          "transform 180ms ease",
-                      }}
-                    />
-                  </button>
-
-                  {isOpen && (
-                    <div
-                      className="absolute left-0 top-full mt-3 min-w-[260px] rounded-2xl p-2"
-                      style={{
-                        background:
-                          "rgba(255,255,255,0.97)",
-
-                        border:
-                          `1px solid ${colors.border}`,
-
-                        boxShadow:
-                          "0 20px 40px -20px rgba(31,61,43,0.4)",
-
-                        backdropFilter:
-                          "blur(16px)",
-                      }}
+                if (group.href) {
+                  return (
+                    <Link
+                      key={
+                        group.key
+                      }
+                      href={
+                        group.href
+                      }
+                      onClick={
+                        closeAll
+                      }
+                      className={`${styles.navLink} flex items-center gap-1`}
                     >
-                      {group.items?.map(
-                        (item, index) => {
-                          const ItemIcon =
-                            itemIcons[group.key]?.[
-                              index
-                            ] ?? Sprout;
+                      <Icon
+                        size={14}
+                      />
 
-                          return (
-                            <Link
-                              key={
-                                item.href +
-                                item.en
-                              }
-                              href={item.href}
-                              onClick={closeAll}
-                              className={styles.dropdownLink}
-                            >
-                              <span
-                                className="flex h-8 w-8 items-center justify-center rounded-lg"
+                      {label}
+                    </Link>
+                  );
+                }
+
+                /* DROPDOWN */
+
+                const isOpen =
+                  openMenu ===
+                  group.key;
+
+                return (
+                  <div
+                    key={
+                      group.key
+                    }
+                    className="relative"
+                  >
+                    <button
+                      type="button"
+                      onClick={() =>
+                        toggleDesktopMenu(
+                          group.key
+                        )
+                      }
+                      className={`${styles.navButton} flex items-center gap-1`}
+                    >
+                      <Icon
+                        size={14}
+                      />
+
+                      {label}
+
+                      <ChevronDown
+                        size={13}
+                        style={{
+                          transform:
+                            isOpen
+                              ? "rotate(180deg)"
+                              : "rotate(0deg)",
+
+                          transition:
+                            "transform 180ms ease",
+                        }}
+                      />
+                    </button>
+
+                    {isOpen && (
+                      <div
+                        className="
+                          absolute
+                          left-0
+                          top-full
+                          mt-3
+                          min-w-[260px]
+                          rounded-2xl
+                          bg-white
+                          p-2
+                          shadow-2xl
+                        "
+                        style={{
+                          border:
+                            "1px solid #E4DFD1",
+                        }}
+                      >
+                        {group.items?.map(
+                          (
+                            item,
+                            index
+                          ) => {
+                            const ItemIcon =
+                              itemIcons[
+                                group.key
+                              ]?.[
+                                index
+                              ] ??
+                              Sprout;
+
+                            return (
+                              <Link
+                                key={
+                                  item.href +
+                                  item.en
+                                }
+                                href={
+                                  item.href
+                                }
+                                onClick={
+                                  closeAll
+                                }
+                                className={
+                                  styles.dropdownLink
+                                }
+                              >
+                                <span
+                                  className="
+                                    flex
+                                    h-8
+                                    w-8
+                                    items-center
+                                    justify-center
+                                    rounded-lg
+                                  "
+                                  style={{
+                                    background:
+                                      "#EAF0E8",
+                                    color:
+                                      "#2F5943",
+                                  }}
+                                >
+                                  <ItemIcon
+                                    size={
+                                      15
+                                    }
+                                  />
+                                </span>
+
+                                <span>
+                                  {lang ===
+                                  "bn"
+                                    ? item.bn
+                                    : item.en}
+                                </span>
+                              </Link>
+                            );
+                          }
+                        )}
+
+                        {/* LOGGED USER */}
+
+                        {group.key ===
+                          "profile" &&
+                          user && (
+                            <>
+                              <div
+                                className="my-2 border-t"
                                 style={{
-                                  background:
-                                    colors.greenSoft,
-                                  color:
-                                    colors.greenLight,
+                                  borderColor:
+                                    "#E4DFD1",
+                                }}
+                              />
+
+                              <div className="px-3 py-2">
+                                <p className="text-xs font-semibold text-[#1F3D2B]">
+                                  {
+                                    user.name
+                                  }
+                                </p>
+
+                                <p className="mt-1 text-[10px] text-[#6B7A6E]">
+                                  {
+                                    user.role
+                                  }
+                                </p>
+                              </div>
+
+                              <button
+                                type="button"
+                                onClick={
+                                  handleLogout
+                                }
+                                className="
+                                  flex
+                                  w-full
+                                  items-center
+                                  gap-3
+                                  rounded-xl
+                                  border-none
+                                  bg-transparent
+                                  px-3
+                                  py-2.5
+                                  text-left
+                                  text-red-700
+                                  hover:bg-red-50
+                                "
+                                style={{
+                                  cursor:
+                                    "pointer",
                                 }}
                               >
-                                <ItemIcon size={15} />
-                              </span>
+                                <LogIn
+                                  size={
+                                    15
+                                  }
+                                  style={{
+                                    transform:
+                                      "rotate(180deg)",
+                                  }}
+                                />
 
-                              <span>
-                                {lang === "bn"
-                                  ? item.bn
-                                  : item.en}
-                              </span>
-                            </Link>
-                          );
-                        }
-                      )}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+                                {
+                                  t.logout
+                                }
+                              </button>
+                            </>
+                          )}
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+            )}
           </div>
 
-          {/* =================================================
-              DESKTOP ACTIONS
-          ================================================= */}
+          {/* ================================
+              RIGHT SIDE
+          ================================= */}
 
-          <div className="hidden items-center gap-2 lg:flex">
-            {/* Language */}
+          <div
+            className="
+              hidden
+              items-center
+              gap-2
+              lg:flex
+            "
+          >
+            {/* LANGUAGE */}
 
             <button
               type="button"
-              onClick={toggleLanguage}
-              className={styles.actionButton}
-              style={{
-                color: colors.muted,
-              }}
+              onClick={
+                toggleLanguage
+              }
+              className={
+                styles.actionButton
+              }
             >
               <Globe size={14} />
+
               {t.language}
             </button>
 
+            {/* LOGGED OUT */}
+
             {!user ? (
               <>
-                {/* Login */}
                 <Link
                   href="/auth/login"
-                  onClick={closeAll}
-                  className={styles.loginButton}
+                  onClick={
+                    closeAll
+                  }
+                  className={
+                    styles.loginButton
+                  }
                 >
                   <LogIn size={14} />
+
                   {t.login}
                 </Link>
 
-                {/* Register */}
                 <Link
                   href="/auth/register"
-                  onClick={closeAll}
-                  className={styles.registerButton}
+                  onClick={
+                    closeAll
+                  }
+                  className={
+                    styles.registerButton
+                  }
                 >
-                  <UserPlus size={14} />
+                  <UserPlus
+                    size={14}
+                  />
+
                   {t.register}
                 </Link>
               </>
             ) : (
-              <>
-                {/* User badge */}
-                <span className="text-xs font-semibold text-[#1F3D2B] bg-[#EAF0E8] px-3 py-1.5 rounded-xl border border-[#E4DFD1] flex items-center gap-1.5">
-                  <UserCircle2 size={14} />
-                  {user.name} ({lang === "bn" ? (user.role === "Admin" ? "অ্যাডমিন" : "কৃষক") : user.role})
+              /* LOGGED IN */
+
+              <button
+                type="button"
+                onClick={() =>
+                  toggleDesktopMenu(
+                    "profile"
+                  )
+                }
+                className="
+                  flex
+                  items-center
+                  gap-2
+                  rounded-full
+                  border
+                  border-[#E4DFD1]
+                  bg-[#EAF0E8]
+                  px-3
+                  py-2
+                "
+                style={{
+                  color: "#1F3D2B",
+                  cursor:
+                    "pointer",
+                }}
+              >
+                <UserCircle2
+                  size={17}
+                />
+
+                <span className="max-w-[100px] truncate text-xs font-semibold">
+                  {user.name}
                 </span>
 
-                {/* Logout */}
-                <button
-                  onClick={() => {
-                    logoutUserClient();
-                    setUser(null);
-                    closeAll();
-                    router.push("/");
-                    router.refresh();
-                  }}
-                  className={styles.registerButton}
+                <ChevronDown
+                  size={13}
                   style={{
-                    backgroundColor: "#9B1C1C",
-                    borderColor: "#9B1C1C",
+                    transform:
+                      openMenu ===
+                      "profile"
+                        ? "rotate(180deg)"
+                        : "rotate(0deg)",
+
+                    transition:
+                      "transform 180ms ease",
                   }}
-                >
-                  <LogIn size={14} style={{ transform: "rotate(180deg)" }} />
-                  {lang === "bn" ? "লগ আউট" : "Log out"}
-                </button>
-              </>
+                />
+              </button>
             )}
           </div>
 
-          {/* =================================================
-              MOBILE BUTTON
-          ================================================= */}
+          {/* MOBILE */}
 
           <button
             type="button"
             onClick={() => {
-              setMobileOpen((current) => !current);
+              setMobileOpen(
+                (current) =>
+                  !current
+              );
+
               setOpenMenu(null);
             }}
-            aria-label={
-              mobileOpen
-                ? "Close menu"
-                : "Open menu"
-            }
-            aria-expanded={mobileOpen}
-            className="flex h-10 w-10 items-center justify-center rounded-xl lg:hidden"
+            aria-label="Toggle menu"
+            className="
+              flex
+              h-10
+              w-10
+              items-center
+              justify-center
+              rounded-xl
+              border-none
+              lg:hidden
+            "
             style={{
-              background: colors.green,
-              border: "none",
-              color: colors.gold,
-              cursor: "pointer",
+              background:
+                "#1F3D2B",
+
+              color:
+                "#E0A458",
+
+              cursor:
+                "pointer",
             }}
           >
             {mobileOpen ? (
@@ -654,162 +888,272 @@ export default function AgriTechNavbar() {
           </button>
         </div>
 
-        {/* =================================================
+        {/* ================================
             MOBILE MENU
-        ================================================= */}
+            NO HOME HERE
+        ================================= */}
 
         {mobileOpen && (
           <div
-            className="border-t px-3 pb-3 pt-2 lg:hidden"
+            className="
+              border-t
+              px-3
+              pb-3
+              pt-2
+              lg:hidden
+            "
             style={{
-              borderColor: colors.border,
+              borderColor:
+                "#E4DFD1",
             }}
           >
-            {/* Home */}
+            {menuGroups.map(
+              (group) => {
+                const Icon =
+                  group.icon;
 
-            <Link
-              href="/"
-              onClick={closeAll}
-              className={styles.mobileLink}
-            >
-              <Sprout size={16} />
-              {t.home}
-            </Link>
+                const label =
+                  lang === "bn"
+                    ? group.bn
+                    : group.en;
 
-            {menuGroups.map((group) => {
-              const Icon = group.icon;
+                /* SIMPLE */
 
-              const label =
-                lang === "bn"
-                  ? group.bn
-                  : group.en;
-
-              /* Single */
-
-              if (group.href) {
-                return (
-                  <Link
-                    key={group.key}
-                    href={group.href}
-                    onClick={closeAll}
-                    className={styles.mobileLink}
-                  >
-                    <Icon size={16} />
-                    {label}
-                  </Link>
-                );
-              }
-
-              /* Accordion */
-
-              const isOpen =
-                mobileMenu === group.key;
-
-              return (
-                <div
-                  key={group.key}
-                  style={{
-                    borderTop:
-                      `1px solid ${colors.border}`,
-                  }}
-                >
-                  <button
-                    type="button"
-                    onClick={() =>
-                      toggleMobileMenu(
+                if (group.href) {
+                  return (
+                    <Link
+                      key={
                         group.key
-                      )
-                    }
-                    className="flex w-full items-center justify-between px-2 py-3"
-                    style={{
-                      background:
-                        "transparent",
-                      border: "none",
-                      color: colors.text,
-                      cursor: "pointer",
-                    }}
-                  >
-                    <span className="flex items-center gap-3">
+                      }
+                      href={
+                        group.href
+                      }
+                      onClick={
+                        closeAll
+                      }
+                      className={
+                        styles.mobileLink
+                      }
+                    >
                       <Icon size={16} />
+
                       {label}
-                    </span>
+                    </Link>
+                  );
+                }
 
-                    <ChevronDown
-                      size={16}
+                /* DROPDOWN */
+
+                const isOpen =
+                  mobileMenu ===
+                  group.key;
+
+                return (
+                  <div
+                    key={
+                      group.key
+                    }
+                    className="border-t border-[#E4DFD1]"
+                  >
+                    <button
+                      type="button"
+                      onClick={() =>
+                        toggleMobileMenu(
+                          group.key
+                        )
+                      }
+                      className="
+                        flex
+                        w-full
+                        items-center
+                        justify-between
+                        border-none
+                        bg-transparent
+                        px-2
+                        py-3
+                      "
                       style={{
-                        transform: isOpen
-                          ? "rotate(180deg)"
-                          : "rotate(0)",
-                        transition:
-                          "transform 180ms ease",
+                        color:
+                          "#1F3D2B",
+
+                        cursor:
+                          "pointer",
                       }}
-                    />
-                  </button>
+                    >
+                      <span className="flex items-center gap-3">
+                        <Icon
+                          size={16}
+                        />
 
-                  {isOpen && (
-                    <div className="pb-2 pl-8">
-                      {group.items?.map(
-                        (item, index) => {
-                          const ItemIcon =
-                            itemIcons[
-                              group.key
-                            ]?.[index] ??
-                            Sprout;
+                        {label}
+                      </span>
 
-                          return (
-                            <Link
-                              key={
-                                item.href +
-                                item.en
-                              }
-                              href={item.href}
-                              onClick={
-                                closeAll
-                              }
-                              className="flex items-center gap-2.5 rounded-lg px-2 py-2 text-sm"
-                              style={{
-                                color:
-                                  colors.muted,
-                                textDecoration:
-                                  "none",
-                              }}
-                            >
-                              <ItemIcon
-                                size={14}
+                      <ChevronDown
+                        size={16}
+                        style={{
+                          transform:
+                            isOpen
+                              ? "rotate(180deg)"
+                              : "rotate(0deg)",
+
+                          transition:
+                            "transform 180ms ease",
+                        }}
+                      />
+                    </button>
+
+                    {isOpen && (
+                      <div className="pb-2 pl-8">
+                        {group.items?.map(
+                          (
+                            item,
+                            index
+                          ) => {
+                            const ItemIcon =
+                              itemIcons[
+                                group.key
+                              ]?.[
+                                index
+                              ] ??
+                              Sprout;
+
+                            return (
+                              <Link
+                                key={
+                                  item.href +
+                                  item.en
+                                }
+                                href={
+                                  item.href
+                                }
+                                onClick={
+                                  closeAll
+                                }
+                                className="
+                                  flex
+                                  items-center
+                                  gap-2.5
+                                  rounded-lg
+                                  px-2
+                                  py-2.5
+                                  text-sm
+                                "
                                 style={{
                                   color:
-                                    colors.goldDark,
+                                    "#6B7A6E",
+
+                                  textDecoration:
+                                    "none",
                                 }}
-                              />
+                              >
+                                <ItemIcon
+                                  size={
+                                    14
+                                  }
+                                  style={{
+                                    color:
+                                      "#C6863A",
+                                  }}
+                                />
 
-                              {lang === "bn"
-                                ? item.bn
-                                : item.en}
-                            </Link>
-                          );
-                        }
-                      )}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+                                {lang ===
+                                "bn"
+                                  ? item.bn
+                                  : item.en}
+                              </Link>
+                            );
+                          }
+                        )}
 
-            {/* Mobile language */}
+                        {/* PROFILE USER */}
+
+                        {group.key ===
+                          "profile" &&
+                          user && (
+                            <div className="mt-2 border-t border-[#E4DFD1] pt-2">
+                              <div className="px-2 py-2">
+                                <p className="text-xs font-semibold text-[#1F3D2B]">
+                                  {
+                                    user.name
+                                  }
+                                </p>
+
+                                <p className="mt-1 text-[10px] text-[#6B7A6E]">
+                                  {
+                                    user.role
+                                  }
+                                </p>
+                              </div>
+
+                              <button
+                                type="button"
+                                onClick={
+                                  handleLogout
+                                }
+                                className="
+                                  flex
+                                  w-full
+                                  items-center
+                                  gap-2.5
+                                  rounded-lg
+                                  border-none
+                                  bg-transparent
+                                  px-2
+                                  py-2.5
+                                  text-left
+                                  text-sm
+                                  text-red-700
+                                  hover:bg-red-50
+                                "
+                                style={{
+                                  cursor:
+                                    "pointer",
+                                }}
+                              >
+                                <LogIn
+                                  size={
+                                    14
+                                  }
+                                  style={{
+                                    transform:
+                                      "rotate(180deg)",
+                                  }}
+                                />
+
+                                {
+                                  t.logout
+                                }
+                              </button>
+                            </div>
+                          )}
+                      </div>
+                    )}
+                  </div>
+                );
+              }
+            )}
+
+            {/* MOBILE ACTIONS */}
 
             <div
-              className="mt-2 flex gap-2 border-t pt-3"
-              style={{
-                borderColor:
-                  colors.border,
-              }}
+              className="
+                mt-2
+                flex
+                gap-2
+                border-t
+                border-[#E4DFD1]
+                pt-3
+              "
             >
               <button
                 type="button"
-                onClick={toggleLanguage}
+                onClick={
+                  toggleLanguage
+                }
                 className={`${styles.actionButton} flex-1 justify-center`}
               >
                 <Globe size={14} />
+
                 {t.language}
               </button>
 
@@ -817,60 +1161,65 @@ export default function AgriTechNavbar() {
                 <>
                   <Link
                     href="/auth/login"
-                    onClick={closeAll}
+                    onClick={
+                      closeAll
+                    }
                     className={`${styles.loginButton} flex-1 justify-center`}
                   >
                     <LogIn size={14} />
+
                     {t.login}
                   </Link>
 
                   <Link
                     href="/auth/register"
-                    onClick={closeAll}
+                    onClick={
+                      closeAll
+                    }
                     className={`${styles.registerButton} flex-1 justify-center`}
                   >
-                    <UserPlus size={14} />
+                    <UserPlus
+                      size={14}
+                    />
+
                     {t.register}
                   </Link>
                 </>
               ) : (
-                <div className="flex flex-col gap-2 w-full">
-                  <span className="text-xs font-semibold text-[#1F3D2B] bg-[#EAF0E8] px-3 py-2 rounded-xl border border-[#E4DFD1] text-center flex items-center justify-center gap-1.5">
-                    <UserCircle2 size={14} />
-                    {user.name} ({lang === "bn" ? (user.role === "Admin" ? "অ্যাডমিন" : "কৃষক") : user.role})
-                  </span>
-                  
-                  <button
-                    onClick={() => {
-                      logoutUserClient();
-                      setUser(null);
-                      closeAll();
-                      router.push("/");
-                      router.refresh();
-                    }}
-                    className={`${styles.registerButton} justify-center w-full`}
+                <button
+                  type="button"
+                  onClick={
+                    handleLogout
+                  }
+                  className={`${styles.registerButton} flex-1 justify-center`}
+                  style={{
+                    background:
+                      "#9B1C1C",
+
+                    color:
+                      "#FFFFFF",
+
+                    cursor:
+                      "pointer",
+                  }}
+                >
+                  <LogIn
+                    size={14}
                     style={{
-                      backgroundColor: "#9B1C1C",
-                      borderColor: "#9B1C1C",
+                      transform:
+                        "rotate(180deg)",
                     }}
-                  >
-                    <LogIn size={14} style={{ transform: "rotate(180deg)" }} />
-                    {lang === "bn" ? "লগ আউট" : "Log out"}
-                  </button>
-                </div>
+                  />
+
+                  {t.logout}
+                </button>
               )}
             </div>
           </div>
         )}
       </nav>
 
-      {/* =================================================
-          LIGHTWEIGHT CSS
-      ================================================= */}
-
-
-
-      {/* Navbar spacer */}
+      {/* Fixed navbar spacer */}
 
       <div
         aria-hidden="true"

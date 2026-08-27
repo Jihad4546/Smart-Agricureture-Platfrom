@@ -33,7 +33,7 @@ const LoginFormContent = () => {
     }
 
     // 1. Check default hardcoded users
-    let matchedUser = DEFAULT_USERS[email.toLowerCase()];
+    let matchedUser: any = DEFAULT_USERS[email.toLowerCase()];
     
     // 2. Check registered users in localStorage
     if (!matchedUser) {
