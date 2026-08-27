@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState, useRef, useEffect, type ReactNode, type CSSProperties, type RefObject } from "react";
+import { useRouter } from "next/navigation";
 import {
   Sprout, Menu, X, ChevronDown, LayoutDashboard, Wheat, CloudSun,
-  ShoppingBasket, PawPrint, UserCircle2, Bug, TestTube2, BookOpen,
+  PawPrint, UserCircle2, Bug, TestTube2, BookOpen,
   MessageCircleQuestion, LineChart, Store, PackageSearch, ShoppingCart,
   ClipboardList, Bell, Shield, LogIn, UserPlus, Globe, type LucideIcon,
 } from "lucide-react";
@@ -104,6 +105,21 @@ const ITEM_ICONS: Partial<Record<GroupKey, LucideIcon[]>> = {
   knowledge: [CloudSun, Bug, TestTube2, BookOpen, MessageCircleQuestion],
   market: [LineChart, Store, PackageSearch, ShoppingCart, ClipboardList],
   account: [Bell, UserCircle2, Shield],
+};
+
+const NAV_ROUTES: Record<string, string> = {
+  "হোম": "/",
+  Home: "/",
+  "ড্যাশবোর্ড": "/",
+  Dashboard: "/",
+  "ফসল ব্যবস্থাপনা": "/cropManagement",
+  "Crop Management": "/cropManagement",
+  "ফসল যোগ করুন": "/addCrop",
+  "Add Crop": "/addCrop",
+  "ফসলের বিবরণ": "/cropDetails",
+  "Crop Details": "/cropDetails",
+  "ফসল ক্যালেন্ডার": "/cropCalender",
+  "Crop Calendar": "/cropCalender",
 };
 
 const palette = {
@@ -239,6 +255,7 @@ function MegaPanel({ groupKey, group, onNavigate }: MegaPanelProps) {
 }
 
 export default function AgriTechNavbar() {
+  const router = useRouter();
   const [lang, setLang] = useState<Lang>("bn");
   const [openGroup, setOpenGroup] = useState<GroupKey | null>(null);
   const [mobileOpen, setMobileOpen] = useState<boolean>(false);
@@ -252,11 +269,12 @@ export default function AgriTechNavbar() {
   const handleNavigate = (label: string): void => {
     setOpenGroup(null);
     setMobileOpen(false);
-    console.log("navigate ->", label);
+    const route = NAV_ROUTES[label];
+    if (route) router.push(route);
   };
 
   return (
-    <div style={{ background: palette.bg, minHeight: "100vh", fontFamily: "'Hind Siliguri', sans-serif" }}>
+    <div style={{ background: palette.bg, fontFamily: "'Hind Siliguri', sans-serif" }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=Hind+Siliguri:wght@400;500;600;700&display=swap');
       `}</style>
