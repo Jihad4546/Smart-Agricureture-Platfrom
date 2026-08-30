@@ -63,7 +63,7 @@ const menuGroups: MenuGroup[] = [
       {
         bn: "ফসল ব্যবস্থাপনা",
         en: "Crop Management",
-        href: "/crops",
+        href: "/cropManagement",
       },
       {
         bn: "ফসল যোগ করুন",
