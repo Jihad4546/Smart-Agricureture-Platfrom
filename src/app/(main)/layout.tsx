@@ -16,16 +16,10 @@ export default function MainLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className="pb-16 lg:pb-0">
-        <LanguageProvider>
-          <AgriTechNavbar />
-
-          <main>{children}</main>
-          
-          <BottomNav />
-        </LanguageProvider>
-      </body>
-    </html>
+    <LanguageProvider>
+      <AgriTechNavbar />
+      <main className="pb-16 lg:pb-0">{children}</main>
+      <BottomNav />
+    </LanguageProvider>
   );
 }

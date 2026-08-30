@@ -15,6 +15,8 @@ import {
   Tag,
   Scale,
   Trash2,
+  Search,
+  Heart,
 } from "lucide-react";
 
 const translations = {
@@ -451,64 +453,103 @@ export default function MarketplacePage() {
           /* ==============================================
              BUY PRODUCTS TAB
              ============================================== */
-          <div className="space-y-6">
-            {/* Search Input */}
-            <div className="max-w-md">
-              <input
-                type="text"
-                placeholder={t.searchPlaceholder}
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full h-11 rounded-xl border border-[#E4DFD1] bg-white px-4 text-sm text-[#16241C] outline-none focus:border-[#1F3D2B] transition"
-              />
-            </div>
+         <div className="space-y-6">
+  {/* Search Input */}
+  <div className="max-w-md">
+    <input
+      type="text"
+      placeholder={t.searchPlaceholder}
+      value={search}
+      onChange={(e) => setSearch(e.target.value)}
+      className="w-full h-11 rounded-xl border border-[#E4DFD1] bg-white px-4 text-sm text-[#16241C] outline-none focus:border-[#1F3D2B] transition"
+    />
+  </div>
 
-            {/* Listings Grid */}
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {filteredListings.map((item) => (
-                <div
-                  key={item.id}
-                  className="rounded-3xl border border-[#E4DFD1] bg-white p-6 shadow-sm flex flex-col justify-between hover:border-[#1F3D2B] transition"
-                >
-                  <div>
-                    <div className="flex items-center justify-between mb-3">
-                      <span className="inline-flex items-center rounded-full bg-[#EAF0E8] px-2.5 py-0.5 text-xs font-semibold text-[#1F3D2B]">
-                        {lang === "bn" ? item.categoryBn : item.category}
-                      </span>
-                      <span className="text-xs text-[#6B7A6E]">
-                        {t.seller}: <strong className="text-[#16241C]">{item.seller}</strong>
-                      </span>
-                    </div>
+  {/* Product Grid */}
+  <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+    {filteredListings.map((item) => (
+      <div
+        key={item.id}
+        className="group relative bg-white border border-[#E4DFD1] p-4 rounded-2xl transition-all hover:shadow-lg hover:border-[#1F3D2B] text-center flex flex-col justify-between"
+      >
+        {/* Sale Badge */}
+        {item.onSale && (
+          <span className="absolute top-3 left-3 bg-[#1F3D2B] text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm z-10">
+            SALE!
+          </span>
+        )}
 
-                    <h3 className="text-lg font-bold text-[#16241C] leading-snug">
-                      {lang === "bn" ? item.titleBn : item.title}
-                    </h3>
-                    <p className="text-xs text-[#6B7A6E] mt-2 leading-relaxed">
-                      {item.description}
-                    </p>
-                  </div>
+        <div>
+          {/* Image & Overlay Actions */}
+          <div className="relative w-full h-44 mb-4 overflow-hidden rounded-xl flex items-center justify-center bg-[#FAF8F3]">
+            <img
+              src={item.image}
+              alt={lang === "bn" ? item.titleBn : item.title}
+              className="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105"
+            />
 
-                  <div className="mt-6 border-t border-[#FAF8F3] pt-4 flex items-center justify-between">
-                    <div>
-                      <p className="text-[10px] text-[#6B7A6E] uppercase font-semibold">{t.price}</p>
-                      <p className="text-lg font-extrabold text-[#1F3D2B]">
-                        ৳{item.price} <span className="text-xs font-normal text-[#6B7A6E]">/ {lang === "bn" ? item.unitBn : item.unit}</span>
-                      </p>
-                      <p className="text-[10px] text-[#6B7A6E] mt-0.5">Stock: {item.quantity} {lang === "bn" ? item.unitBn : item.unit}</p>
-                    </div>
-
-                    <button
-                      onClick={() => handleAddToCart(item)}
-                      className="flex h-9 items-center justify-center gap-1.5 rounded-xl bg-[#1F3D2B] px-4 text-xs font-semibold text-white hover:bg-[#2F5943] transition"
-                    >
-                      <ShoppingCart size={14} />
-                      {t.addToCart}
-                    </button>
-                  </div>
-                </div>
-              ))}
+            {/* Quick Action Buttons */}
+            <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+              <button
+                onClick={() => {
+                  setSelectedProduct(item);
+                  setQuantity(1);
+                }}
+                title="Quick View"
+                className="p-2 bg-white text-[#16241C] rounded-full hover:bg-[#1F3D2B] hover:text-white transition-colors shadow"
+              >
+                <Search size={16} />
+              </button>
+              <button
+                onClick={() => handleAddToCart(item)}
+                title={t.addToCart}
+                className="p-2 bg-white text-[#16241C] rounded-full hover:bg-[#1F3D2B] hover:text-white transition-colors shadow"
+              >
+                <ShoppingCart size={16} />
+              </button>
+              <button
+                title="Wishlist"
+                className="p-2 bg-white text-[#16241C] rounded-full hover:bg-[#1F3D2B] hover:text-white transition-colors shadow"
+              >
+                <Heart size={16} />
+              </button>
             </div>
           </div>
+
+          {/* Product Details */}
+          <h3
+            onClick={() => {
+              setSelectedProduct(item);
+              setQuantity(1);
+            }}
+            className="text-base font-bold text-[#16241C] hover:text-[#1F3D2B] cursor-pointer transition-colors leading-snug"
+          >
+            {lang === "bn" ? item.titleBn : item.title}
+          </h3>
+
+          <p className="text-xs text-[#6B7A6E] mt-1">
+            {t.seller}: <strong className="text-[#16241C]">{item.seller}</strong>
+          </p>
+        </div>
+
+        {/* Price & Weight */}
+        <div className="mt-4 pt-3 border-t border-[#FAF8F3] flex items-center justify-center gap-1.5 text-sm">
+          {item.originalPrice && (
+            <span className="text-xs text-gray-400 line-through">
+              ৳{item.originalPrice}
+            </span>
+          )}
+          <span className="text-base font-extrabold text-[#1F3D2B]">
+            ৳{item.price}
+          </span>
+          <span className="text-xs text-[#6B7A6E]">
+            / {lang === "bn" ? item.unitBn : item.unit}
+          </span>
+        </div>
+      </div>
+    ))}
+  </div>
+</div>
         )}
 
         {activeTab === "sell" && (

@@ -6,7 +6,7 @@ import {
   Sprout, Menu, X, ChevronDown, LayoutDashboard, Wheat, CloudSun,
   PawPrint, UserCircle2, Bug, TestTube2, BookOpen,
   MessageCircleQuestion, LineChart, Store, PackageSearch, ShoppingCart,
-  ClipboardList, Bell, Shield, LogIn, UserPlus, Globe, type LucideIcon,
+  ClipboardList, Bell, Shield, LogIn, UserPlus, Globe, Beaker, type LucideIcon,
 } from "lucide-react";
 
 type Lang = "bn" | "en";
@@ -49,7 +49,7 @@ const T: Record<Lang, Translation> = {
       },
       knowledge: {
         label: "জ্ঞান ও পরামর্শ",
-        items: ["আবহাওয়া", "রোগ শনাক্তকরণ", "মাটি বিশ্লেষণ", "রোগ লাইব্রেরি", "বিশেষজ্ঞ পরামর্শ"],
+        items: ["আবহাওয়া", "মাটি ব্যবস্থাপনা", "রোগ শনাক্তকরণ", "রোগ লাইব্রেরি", "বিশেষজ্ঞ পরামর্শ"],
       },
       market: {
         label: "বাজার",
@@ -76,7 +76,7 @@ const T: Record<Lang, Translation> = {
       },
       knowledge: {
         label: "Farm Intelligence",
-        items: ["Weather", "Disease Detection", "Soil Analysis", "Disease Library", "Expert Consultation"],
+        items: ["Weather", "Soil Management", "Disease Detection", "Disease Library", "Expert Consultation"],
       },
       market: {
         label: "Market",
@@ -102,7 +102,7 @@ const GROUP_ICONS: Record<GroupKey, LucideIcon> = {
 
 const ITEM_ICONS: Partial<Record<GroupKey, LucideIcon[]>> = {
   crop: [Wheat, Sprout, ClipboardList, CloudSun],
-  knowledge: [CloudSun, Bug, TestTube2, BookOpen, MessageCircleQuestion],
+  knowledge: [CloudSun, TestTube2, Bug, BookOpen, MessageCircleQuestion],
   market: [LineChart, Store, PackageSearch, ShoppingCart, ClipboardList],
   account: [Bell, UserCircle2, Shield],
 };
@@ -110,8 +110,8 @@ const ITEM_ICONS: Partial<Record<GroupKey, LucideIcon[]>> = {
 const NAV_ROUTES: Record<string, string> = {
   "হোম": "/",
   Home: "/",
-  "ড্যাশবোর্ড": "/",
-  Dashboard: "/",
+  "ড্যাশবোর্ড": "/dashboard",
+  Dashboard: "/dashboard",
   "ফসল ব্যবস্থাপনা": "/cropManagement",
   "Crop Management": "/cropManagement",
   "ফসল যোগ করুন": "/addCrop",
@@ -120,6 +120,38 @@ const NAV_ROUTES: Record<string, string> = {
   "Crop Details": "/cropDetails",
   "ফসল ক্যালেন্ডার": "/cropCalender",
   "Crop Calendar": "/cropCalender",
+  "আবহাওয়া": "/weather",
+  Weather: "/weather",
+  "মাটি ব্যবস্থাপনা": "/soil",
+  "Soil Management": "/soil",
+  "রোগ শনাক্তকরণ": "/disease",
+  "Disease Detection": "/disease",
+  "রোগ লাইব্রেরি": "/disease",
+  "Disease Library": "/disease",
+  "বিশেষজ্ঞ পরামর্শ": "/settings",
+  "Expert Consultation": "/settings",
+  "বাজার দর": "/market-prices",
+  "Market Prices": "/market-prices",
+  "মার্কেটপ্লেস": "/marketplace",
+  Marketplace: "/marketplace",
+  "পণ্যের বিবরণ": "/cropDetails",
+  "Product Details": "/cropDetails",
+  "কার্ট": "/cart",
+  Cart: "/cart",
+  "অর্ডার": "/orders",
+  Orders: "/orders",
+  "পশুপালন": "/dashboard",
+  Livestock: "/dashboard",
+  "নোটিফিকেশন": "/settings",
+  Notifications: "/settings",
+  "প্রোফাইল": "/profile",
+  Profile: "/profile",
+  "অ্যাডমিন ড্যাশবোর্ড": "/dashboard",
+  "Admin Dashboard": "/dashboard",
+  "লগ ইন": "/auth/login",
+  "Log in": "/auth/login",
+  "নিবন্ধন": "/auth/register",
+  Register: "/auth/register",
 };
 
 const palette = {
