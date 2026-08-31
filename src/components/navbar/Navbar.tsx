@@ -126,7 +126,7 @@ const menuGroups: MenuGroup[] = [
       {
         bn: "বাজার দর",
         en: "Market Prices",
-        href: "/marketplace",
+        href: "/marketPrices",
       },
       {
         bn: "মার্কেটপ্লেস",
@@ -136,7 +136,7 @@ const menuGroups: MenuGroup[] = [
       {
         bn: "পণ্যের বিবরণ",
         en: "Product Details",
-        href: "/marketplace",
+        href: "/productDetails",
       },
       {
         bn: "কার্ট",
