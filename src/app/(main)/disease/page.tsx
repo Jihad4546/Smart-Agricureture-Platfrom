@@ -54,6 +54,16 @@ const translations = {
     uploadFailed: "ছবি আপলোড ব্যর্থ হয়েছে। আবার চেষ্টা করুন।",
     diagnosisFailed: "এআই রোগ নির্ণয় ব্যর্থ হয়েছে। আবার চেষ্টা করুন।",
   },
+} as const;
+
+type DiagnosisResult = {
+  disease: string;
+  scientificName?: string;
+  confidence: number | string;
+  symptoms?: string[];
+  organicTreatment?: string[];
+  chemicalTreatment?: string[];
+  prevention?: string[];
 };
 
 export default function DiseaseDoctorPage() {
@@ -66,7 +76,7 @@ export default function DiseaseDoctorPage() {
   const [imageUrl, setImageUrl] = useState("");
   const [uploading, setUploading] = useState(false);
   const [scanning, setScanning] = useState(false);
-  const [result, setResult] = useState(null);
+  const [result, setResult] = useState<DiagnosisResult | null>(null);
   const [error, setError] = useState("");
 
   // Authentication
