@@ -159,7 +159,7 @@ export default function DiseaseDoctorPage() {
       // Optimize Cloudinary image
       const optimizedUrl = data.secure_url.replace(
         "/upload/",
-        "/upload/f_auto,q_auto,w_1024/"
+        "/upload/f_auto,q_auto,w_800/"
       );
 
       console.log(
@@ -299,13 +299,13 @@ export default function DiseaseDoctorPage() {
                 <div className="relative mb-6 h-44 w-44 overflow-hidden rounded-2xl border border-[#E4DFD1] bg-black/5">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={image}
+                    src={image || undefined}
                     alt="Scanning crop"
                     className="h-full w-full object-cover"
                   />
 
                   {/* Scanning animation */}
-                  <div className="absolute inset-x-0 top-0 h-1 animate-[scan_2s_ease-in-out_infinite] bg-red-500 shadow-lg shadow-red-500/50" />
+<div className="absolute inset-x-0 top-0 h-1 animate-[scan_2s_ease-in-out_infinite] bg-red-500 shadow-lg shadow-red-500/50" />
                 </div>
 
                 <div className="flex items-center gap-2">
