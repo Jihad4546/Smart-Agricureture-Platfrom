@@ -1,13 +1,13 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import MarketHeader from "../../Component/market/MarketHeader";
-import MarketSummaryCard from "../../Component/market/MarketSummaryCard";
-import MarketFilters from "../../Component/market/MarketFilters";
-import CropPriceTable from "../../Component/market/CropPriceTable";
-import PriceTrend from "../../Component/market/PriceTrend";
-import MarketComparison from "../../Component/market/MarketComparison";
-import MarketInsight from "../../Component/market/MarketInsight";
+import MarketHeader from "../../components/market/MarketHeader";
+import MarketSummaryCard from "../../components/market/MarketSummaryCard";
+import MarketFilters from "../../components/market/MarketFilters";
+import CropPriceTable from "../../components/market/CropPriceTable";
+import PriceTrend from "../../components/market/PriceTrend";
+import MarketComparison from "../../components/market/MarketComparison";
+import MarketInsight from "../../components/market/MarketInsight";
 
 import { CropCategory, MarketLocation } from "../../types/market";
 import { DEMO_CROP_PRICES, DEMO_SUMMARY_DATA } from "../../data/marketData";
