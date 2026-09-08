@@ -162,11 +162,7 @@ function getDayName(
 }
 
 export default function WeatherPage() {
-  /*
-   * IMPORTANT:
-   * এখানে নিজের useLanguage() তৈরি করবেন না।
-   * আপনার LanguageContext-এর useLanguage() ব্যবহার করবেন।
-   */
+ 
   const { lang } = useLanguage();
 
   const currentLang: Language =
@@ -182,10 +178,6 @@ export default function WeatherPage() {
 
   const serverUrl =
     process.env.NEXT_PUBLIC_SERVER_URL;
-
-  // =========================
-  // Fetch Weather
-  // =========================
 
   const fetchWeather = async () => {
     try {
@@ -227,21 +219,9 @@ export default function WeatherPage() {
     }
   };
 
-  /*
-   * ভাষা পরিবর্তন হলে:
-   *
-   * 1. currentLang পরিবর্তন হবে
-   * 2. component re-render হবে
-   * 3. Weather API আবার call হবে
-   * 4. WeatherAPI-তে lang=bn/en যাবে
-   */
   useEffect(() => {
     void fetchWeather();
   }, [currentLang]);
-
-  // =========================
-  // Farming Advisory
-  // =========================
 
   const farmingAdvice = useMemo(() => {
     if (!weather?.current) {
@@ -308,9 +288,6 @@ export default function WeatherPage() {
     return advice;
   }, [weather, currentLang]);
 
-  // =========================
-  // Loading
-  // =========================
 
   if (loading) {
     return (
@@ -328,10 +305,6 @@ export default function WeatherPage() {
       </div>
     );
   }
-
-  // =========================
-  // Error
-  // =========================
 
   if (error) {
     return (
@@ -364,9 +337,6 @@ export default function WeatherPage() {
   const current = weather?.current;
   const location = weather?.location;
 
-  /*
-   * Free plan অনুযায়ী শুধু ৩ দিন দেখানো হচ্ছে।
-   */
   const forecastDays =
     weather?.forecast?.forecastday?.slice(0, 3) || [];
 
