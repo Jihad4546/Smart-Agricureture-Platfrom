@@ -1,0 +1,145 @@
+.navLink {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 2px;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  transition:
+    transform 180ms ease,
+    color 180ms ease;
+}
+
+.navLink::after {
+  content: "";
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  bottom: 0;
+  height: 2px;
+  border-radius: 99px;
+  background: #E0A458; /* colors.gold */
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 180ms ease;
+}
+
+.navLink:hover {
+  transform: translateY(-1px);
+  color: #1F3D2B !important; /* colors.green */
+}
+
+.navLink:hover::after {
+  transform: scaleX(1);
+}
+
+.navButton {
+  position: relative;
+  border: none;
+  background: transparent;
+  padding: 6px 2px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    transform 180ms ease,
+    color 180ms ease;
+}
+
+.navButton:hover {
+  transform: translateY(-1px);
+  color: #1F3D2B !important; /* colors.green */
+}
+
+.dropdownLink {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 9px;
+  border-radius: 11px;
+  color: #16241C; /* colors.text */
+  text-decoration: none;
+  font-size: 13px;
+  transition:
+    background 150ms ease,
+    transform 150ms ease;
+}
+
+.dropdownLink:hover {
+  background: #EAF0E8; /* colors.greenSoft */
+  transform: translateX(3px);
+}
+
+.actionButton,
+.loginButton,
+.registerButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 7px 11px;
+  border-radius: 10px;
+  font-size: 13px;
+  text-decoration: none;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.actionButton {
+  border: 1px solid #E4DFD1; /* colors.border */
+  background: #FAF8F3; /* colors.cream */
+  cursor: pointer;
+}
+
+.loginButton {
+  border: 1px solid #E4DFD1; /* colors.border */
+  background: #FFFFFF; /* colors.white */
+  color: #16241C; /* colors.text */
+}
+
+.registerButton {
+  border: none;
+  background: linear-gradient(
+    145deg,
+    #f0b76a,
+    #E0A458 /* colors.gold */
+  );
+  color: #1F3D2B; /* colors.green */
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow:
+    0 6px 12px -8px
+    rgba(198, 134, 58, 0.8);
+}
+
+.actionButton:hover,
+.loginButton:hover,
+.registerButton:hover {
+  transform: translateY(-1px);
+}
+
+.mobileLink {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 8px;
+  border-top: 1px solid #E4DFD1; /* colors.border */
+  color: #16241C; /* colors.text */
+  text-decoration: none;
+  font-size: 14px;
+}
+
+@media (max-width: 380px) {
+  .registerButton,
+  .loginButton,
+  .actionButton {
+    padding-left: 7px;
+    padding-right: 7px;
+    font-size: 12px;
+  }
+}
