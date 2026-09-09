@@ -15,7 +15,6 @@ import {
 } from "lucide-react";
 import { useLanguage } from "../../../contexts/LanguageContext";
 
-// WeatherAPI এর জন্য ৬৪ জেলার স্থানাঙ্ক (Lat, Long) ও নাম
 const BANGLADESH_DISTRICTS = [
   { en: "Dhaka", bn: "ঢাকা", coords: "23.8103,90.4125" },
   { en: "Faridpur", bn: "ফরিদপুর", coords: "23.6071,89.8425" },
@@ -126,7 +125,7 @@ const translations = {
     tomorrow: "আগামীকাল",
     max: "সর্বোচ্চ",
     min: "সর্বনিম্ন",
-    uv: "UV",
+    uv: "অতিবেগুনি রশ্মি সূচক",
     poweredBy: "তথ্য সরবরাহকারী",
     selectDistrict: "জেলা নির্বাচন করুন",
   },
