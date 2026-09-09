@@ -1,6 +1,6 @@
 "use client";
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Globe, Home, Menu, Sprout, X } from 'lucide-react';
+import { Globe, Home, Menu, MessageCircle, Sprout, X } from 'lucide-react';
 import React, { useState } from 'react';
 import Link from "next/link";
 
@@ -19,18 +19,18 @@ const SideBar = () => {
     toggleLang();
 setIsOpen(false); 
   };
-  const menuItems = [
-    {
-      name: t.language,
-      icon: <Globe size={14} />,
-      onClick: toggleLanguage,
-    },
-    {
-      name: lang === 'bn' ? 'হোম' : 'Home',
-      icon: <Home className="w-5 h-5" />,
-      href: '/dashboard/farmer',
-    },
-  ];
+  const dashboardMenuItems = {
+  "farmer": [
+{name: t.language,icon: <Globe size={14} />,onClick: toggleLanguage,},
+{name: lang === 'bn' ? 'হোম' : 'Home',icon: <Home className="w-5 h-5" />,href: '/dashboard/farmer',},
+{name: lang === 'bn' ? 'চ্যাট' : 'Chat',icon: <MessageCircle className="w-5 h-5" />,href: '/dashboard/farmerChat',},
+  ],
+  "expert":[
+  {name: t.language,icon: <Globe size={14} />,onClick: toggleLanguage,},  
+  {name: lang === 'bn' ? 'চ্যাট' : 'Chat',icon: <MessageCircle className="w-5 h-5" />,href: '/dashboard/expertChat',},
+  ]
+}
+  const menuItems = dashboardMenuItems["farmer"];
     return (
  <>
       {/* Mobile Menu Toggle Button */}
