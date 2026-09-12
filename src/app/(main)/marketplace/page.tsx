@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "../../../contexts/LanguageContext";
-import { getAuthUserClient } from "../../../lib/auth";
 import {
   ArrowLeft,
   TrendingUp,
@@ -143,12 +142,6 @@ export default function MarketplacePage() {
   const [success, setSuccess] = useState("");
 
   useEffect(() => {
-    const currentUser = getAuthUserClient();
-    if (!currentUser) {
-      router.push("/auth/login?redirect=/marketplace");
-      return;
-    }
-    setUser(currentUser);
 
     // Initial listings configuration
     try {

@@ -1,9 +1,8 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "../../../contexts/LanguageContext";
-import { getAuthUserClient } from "../../../lib/auth";
 import {
   ArrowLeft,
   Upload,
@@ -78,15 +77,6 @@ export default function DiseaseDoctorPage() {
   const [scanning, setScanning] = useState(false);
   const [result, setResult] = useState<DiagnosisResult | null>(null);
   const [error, setError] = useState("");
-
-  // Authentication
-  useEffect(() => {
-    const user = getAuthUserClient();
-
-    if (!user) {
-      router.push("/auth/login?redirect=/disease");
-    }
-  }, [router]);
 
   // Image upload
   const handleImageChange = async (
