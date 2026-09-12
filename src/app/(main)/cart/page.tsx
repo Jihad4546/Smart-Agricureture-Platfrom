@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "../../../contexts/LanguageContext";
-import { getAuthUserClient } from "../../../lib/auth";
 import { ArrowLeft, ShoppingCart, Trash2, Plus, Minus, CreditCard, Tag } from "lucide-react";
 
 const translations = {

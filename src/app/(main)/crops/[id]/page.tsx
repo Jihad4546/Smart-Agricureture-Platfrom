@@ -3,7 +3,7 @@
 import React, { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "../../../../contexts/LanguageContext";
-import { getAuthUserClient } from "../../../../lib/auth";
+
 import {
   ArrowLeft,
   Sprout,

@@ -13,11 +13,7 @@ import {
   Sprout,
   X,
 } from "lucide-react";
-import CropCard from "@/components/crop/CropCard";
-import CropDetails from "@/components/crop/CropDetails";
-import CropForm from "@/components/crop/CropForm";
-import CropSummary from "@/components/crop/CropSummary";
-import DeleteCropModal from "@/components/crop/DeleteCropModal";
+
 import cropApi from "@/services/cropApi";
 import type {
   Crop,
