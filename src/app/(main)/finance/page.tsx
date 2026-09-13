@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "../../../contexts/LanguageContext";
-import { getAuthUserClient } from "../../../lib/auth";
+
 import { ArrowLeft, Coins, Plus, Trash2, TrendingUp, TrendingDown, DollarSign } from "lucide-react";
 
 const translations = {
@@ -74,11 +74,6 @@ export default function FinancePage() {
   const [success, setSuccess] = useState("");
 
   useEffect(() => {
-    const user = getAuthUserClient();
-    if (!user) {
-      router.push("/auth/login?redirect=/finance");
-      return;
-    }
 
     try {
       const stored = localStorage.getItem("farm_finance");

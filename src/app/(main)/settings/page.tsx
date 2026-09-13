@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "../../../contexts/LanguageContext";
-import { getAuthUserClient } from "../../../lib/auth";
 import { ArrowLeft, Settings, Globe, Bell, RefreshCw, Moon, Sun } from "lucide-react";
 
 const translations = {
@@ -55,13 +54,7 @@ export default function SettingsPage() {
   const [darkMode, setDarkMode] = useState(false);
   const [savedMsg, setSavedMsg] = useState("");
 
-  useEffect(() => {
-    const user = getAuthUserClient();
-    if (!user) {
-      router.push("/auth/login?redirect=/settings");
-    }
-  }, [router]);
-
+  
   const handleReset = () => {
     if (!confirm(t.resetBtn + "?")) return;
     localStorage.removeItem("farmer_crops");

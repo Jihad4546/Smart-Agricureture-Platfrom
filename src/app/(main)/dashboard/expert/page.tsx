@@ -1,11 +1,11 @@
 import React from 'react';
 
-const soilManagement = () => {
+const ExpertPage = () => {
     return (
         <div>
-            
+          expert  
         </div>
     );
 };
 
-export default soilManagement;
+export default ExpertPage;

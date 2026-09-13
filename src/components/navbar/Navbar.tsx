@@ -3,13 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-
-import {
-  getAuthUserClient,
-  logoutUserClient,
-  User,
-} from "../../lib/auth";
-
 import { useLanguage } from "../../contexts/LanguageContext";
 
 import styles from "./Navbar.module.css";
@@ -33,10 +26,13 @@ import {
   ShoppingCart,
   ClipboardList,
   LogIn,
-  UserPlus,
   Globe,
-  LayoutDashboard,
 } from "lucide-react";
+import { authClient, useSession } from "@/lib/auth-client";
+import { Dropdown, DropdownItem, DropdownMenu, DropdownTrigger } from "@heroui/react";
+import Image from "next/image";
+import { FaSignOutAlt } from "react-icons/fa";
+import { MdDashboard } from "react-icons/md";
 
 type MenuItem = {
   bn: string;
@@ -158,25 +154,6 @@ const menuGroups: MenuGroup[] = [
     icon: PawPrint,
     href: "/livestock",
   },
-
-  {
-    key: "profile",
-    bn: "প্রোফাইল",
-    en: "Profile",
-    icon: UserCircle2,
-    items: [
-      {
-        bn: "প্রোফাইল",
-        en: "Profile",
-        href: "/profile",
-      },
-      {
-        bn: "ড্যাশবোর্ড",
-        en: "Dashboard",
-        href: "/dashboard/farmer",
-      },
-    ],
-  },
 ];
 
 const itemIcons: Record<string, any[]> = {
@@ -202,11 +179,7 @@ const itemIcons: Record<string, any[]> = {
     ShoppingCart,
     ClipboardList,
   ],
-
-  profile: [
-    UserCircle2,
-    LayoutDashboard,
-  ],
+  livestock: [PawPrint],
 };
 
 export default function AgriTechNavbar() {
@@ -221,19 +194,21 @@ export default function AgriTechNavbar() {
 
   const [scrolled, setScrolled] =
     useState(false);
-
-  const [user, setUser] =
-    useState<User | null>(null);
-
-  const router = useRouter();
+ const [dropdownOpen, setDropdownOpen] = useState(false);
   const pathname = usePathname();
   const navRef =
     useRef<HTMLElement>(null);
-
+  const {data: session} = useSession();
+  const user = session?.user;
+  console.log(user)
   /* ================================
      GLOBAL LANGUAGE
   ================================= */
-
+  const router = useRouter()
+const handleLogout = async () => {
+    await authClient.signOut();
+    router.push("/");
+  };
   const {
     lang,
     toggleLang,
@@ -241,44 +216,6 @@ export default function AgriTechNavbar() {
   } = useLanguage();
 
   const t = translation.nav;
-
-  /* ================================
-     AUTH USER
-  ================================= */
-
-  useEffect(() => {
-    const currentUser =
-      getAuthUserClient();
-
-    setUser(currentUser);
-  }, []);
-
-  /* ================================
-     SCROLL
-  ================================= */
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(
-        window.scrollY > 15
-      );
-    };
-
-    window.addEventListener(
-      "scroll",
-      handleScroll,
-      { passive: true }
-    );
-
-    handleScroll();
-
-    return () => {
-      window.removeEventListener(
-        "scroll",
-        handleScroll
-      );
-    };
-  }, []);
 
   /* ================================
      OUTSIDE CLICK
@@ -311,6 +248,24 @@ export default function AgriTechNavbar() {
     };
   }, []);
 
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   if (pathname.includes("dashboard")) {
     return null;
   }
@@ -335,23 +290,7 @@ export default function AgriTechNavbar() {
     setOpenMenu(null);
     setMobileMenu(null);
   };
-
-  /* ================================
-     LOGOUT
-  ================================= */
-
-  const handleLogout = () => {
-    logoutUserClient();
-
-    setUser(null);
-
-    closeAll();
-
-    router.push("/");
-
-    router.refresh();
-  };
-
+  
   /* ================================
      MENU TOGGLE
   ================================= */
@@ -371,7 +310,6 @@ export default function AgriTechNavbar() {
       current === key ? null : key
     );
   };
-
   return (
     <>
       <nav
@@ -658,76 +596,7 @@ export default function AgriTechNavbar() {
                               </Link>
                             );
                           }
-                        )}
-
-                        {/* LOGGED USER */}
-
-                        {group.key ===
-                          "profile" &&
-                          user && (
-                            <>
-                              <div
-                                className="my-2 border-t"
-                                style={{
-                                  borderColor:
-                                    "#E4DFD1",
-                                }}
-                              />
-
-                              <div className="px-3 py-2">
-                                <p className="text-xs font-semibold text-[#1F3D2B]">
-                                  {
-                                    user.name
-                                  }
-                                </p>
-
-                                <p className="mt-1 text-[10px] text-[#6B7A6E]">
-                                  {
-                                    user.role
-                                  }
-                                </p>
-                              </div>
-
-                              <button
-                                type="button"
-                                onClick={
-                                  handleLogout
-                                }
-                                className="
-                                  flex
-                                  w-full
-                                  items-center
-                                  gap-3
-                                  rounded-xl
-                                  border-none
-                                  bg-transparent
-                                  px-3
-                                  py-2.5
-                                  text-left
-                                  text-red-700
-                                  hover:bg-red-50
-                                "
-                                style={{
-                                  cursor:
-                                    "pointer",
-                                }}
-                              >
-                                <LogIn
-                                  size={
-                                    15
-                                  }
-                                  style={{
-                                    transform:
-                                      "rotate(180deg)",
-                                  }}
-                                />
-
-                                {
-                                  t.logout
-                                }
-                              </button>
-                            </>
-                          )}
+                        )}                   
                       </div>
                     )}
                   </div>
@@ -740,126 +609,90 @@ export default function AgriTechNavbar() {
               RIGHT SIDE
           ================================= */}
 
-          <div
-            className="
-              hidden
-              items-center
-              gap-2
-              lg:flex
-            "
-          >
-            {/* LANGUAGE */}
-
+          <div className="hidden items-center gap-3 lg:flex">
+            {/* LANGUAGE BUTTON */}
             <button
               type="button"
-              onClick={
-                toggleLanguage
-              }
-              className={
-                styles.actionButton
-              }
+              onClick={toggleLanguage}
+              className={styles.actionButton}
             >
               <Globe size={14} />
-
               {t.language}
             </button>
 
-            {/* LOGGED OUT */}
-
-            {!user ? (
-              <>
-                <Link
-                  href="/auth/login"
-                  onClick={
-                    closeAll
-                  }
-                  className={
-                    styles.loginButton
-                  }
+            {/* LOGGED USER */}
+            {session?.user ? (
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  type="button"
+                  onClick={() => setDropdownOpen(!dropdownOpen)}
+                  className="flex cursor-pointer items-center"
                 >
-                  <LogIn size={14} />
-
-                  {t.login}
-                </Link>
-
-                <Link
-                  href="/auth/register"
-                  onClick={
-                    closeAll
-                  }
-                  className={
-                    styles.registerButton
-                  }
-                >
-                  <UserPlus
-                    size={14}
+                  <Image
+                    width={36}
+                    height={36}
+                    className="h-9 w-9 rounded-full border border-[#2F5943] object-cover"
+                    src={session.user.image || "/default-avatar.png"}
+                    alt="avatar"
                   />
+                </button>
 
-                  {t.register}
-                </Link>
-              </>
-            ) : (
-              /* LOGGED IN */
+                {dropdownOpen && (
+      <div className="absolute right-0 mt-3 w-56 rounded-2xl border border-white/10 bg-white py-2 shadow-xl">
+                    <div className="border-b border-[#2F5943] px-4 py-2">
+                      <p className="text-xs font-bold text-slate-600">
+                        {(session.user as typeof session.user & { role?: string }).role ?? "User"} Account
+                      </p>
+                      <p className="font-semibold text-slate-600">
+                        {session.user.name}
+                      </p>
+                      <p className="truncate text-xs text-slate-600">
+                        {session.user.email}
+                      </p>
+                    </div>
 
-              <button
-                type="button"
-                onClick={() =>
-                  toggleDesktopMenu(
-                    "profile"
-                  )
-                }
-                className="
-                  flex
-                  items-center
-                  gap-2
-                  rounded-full
-                  border
-                  border-[#E4DFD1]
-                  bg-[#EAF0E8]
-                  px-3
-                  py-2
-                "
-                style={{
-                  color: "#1F3D2B",
-                  cursor:
-                    "pointer",
-                }}
-              >
-                <UserCircle2
-                  size={17}
-                />
+                    <Link
+                      href={`/dashboard/${(session.user as typeof session.user & { role?: string }).role ?? "user"}`}
+                      className="flex items-center gap-2 px-4 py-2 text-slate-600"
+                    >
+                      <MdDashboard />
+                      Dashboard
+                    </Link>
 
-                <span className="max-w-[100px] truncate text-xs font-semibold">
-                  {user.name}
-                </span>
+                    <button
+                      type="button"
+                      onClick={handleLogout}
+              className="flex w-full cursor-pointer items-center gap-2 px-4 py-2 text-red-500 hover:bg-red-500/10"
+                    >
+                      <FaSignOutAlt />
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+            ):(
+         <div className="hidden md:flex items-center gap-3">
+          <Link href="/login">
+            <button className="text-slate-500 hover:text-slate-700 cursor-pointer">
+              Login
+            </button>
+          </Link>
 
-                <ChevronDown
-                  size={13}
-                  style={{
-                    transform:
-                      openMenu ===
-                      "profile"
-                        ? "rotate(180deg)"
-                        : "rotate(0deg)",
-
-                    transition:
-                      "transform 180ms ease",
-                  }}
-                />
-              </button>
+          <Link
+            href="/register"
+className="text-white px-4 py-2 rounded-xl"
+          >
+            SignUp
+          </Link>
+        </div>     
             )}
           </div>
 
           {/* MOBILE */}
-
           <button
             type="button"
             onClick={() => {
-              setMobileOpen(
-                (current) =>
-                  !current
-              );
-
+              setMobileOpen((current) => !current);
               setOpenMenu(null);
             }}
             aria-label="Toggle menu"
@@ -874,21 +707,12 @@ export default function AgriTechNavbar() {
               lg:hidden
             "
             style={{
-              background:
-                "#1F3D2B",
-
-              color:
-                "#E0A458",
-
-              cursor:
-                "pointer",
+              background: "#1F3D2B",
+              color: "#E0A458",
+              cursor: "pointer",
             }}
           >
-            {mobileOpen ? (
-              <X size={20} />
-            ) : (
-              <Menu size={20} />
-            )}
+            {mobileOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
 
@@ -1071,65 +895,8 @@ export default function AgriTechNavbar() {
 
                         {/* PROFILE USER */}
 
-                        {group.key ===
-                          "profile" &&
-                          user && (
-                            <div className="mt-2 border-t border-[#E4DFD1] pt-2">
-                              <div className="px-2 py-2">
-                                <p className="text-xs font-semibold text-[#1F3D2B]">
-                                  {
-                                    user.name
-                                  }
-                                </p>
-
-                                <p className="mt-1 text-[10px] text-[#6B7A6E]">
-                                  {
-                                    user.role
-                                  }
-                                </p>
-                              </div>
-
-                              <button
-                                type="button"
-                                onClick={
-                                  handleLogout
-                                }
-                                className="
-                                  flex
-                                  w-full
-                                  items-center
-                                  gap-2.5
-                                  rounded-lg
-                                  border-none
-                                  bg-transparent
-                                  px-2
-                                  py-2.5
-                                  text-left
-                                  text-sm
-                                  text-red-700
-                                  hover:bg-red-50
-                                "
-                                style={{
-                                  cursor:
-                                    "pointer",
-                                }}
-                              >
-                                <LogIn
-                                  size={
-                                    14
-                                  }
-                                  style={{
-                                    transform:
-                                      "rotate(180deg)",
-                                  }}
-                                />
-
-                                {
-                                  t.logout
-                                }
-                              </button>
-                            </div>
-                          )}
+                        
+                             
                       </div>
                     )}
                   </div>
@@ -1161,63 +928,7 @@ export default function AgriTechNavbar() {
                 {t.language}
               </button>
 
-              {!user ? (
-                <>
-                  <Link
-                    href="/auth/login"
-                    onClick={
-                      closeAll
-                    }
-                    className={`${styles.loginButton} flex-1 justify-center`}
-                  >
-                    <LogIn size={14} />
-
-                    {t.login}
-                  </Link>
-
-                  <Link
-                    href="/auth/register"
-                    onClick={
-                      closeAll
-                    }
-                    className={`${styles.registerButton} flex-1 justify-center`}
-                  >
-                    <UserPlus
-                      size={14}
-                    />
-
-                    {t.register}
-                  </Link>
-                </>
-              ) : (
-                <button
-                  type="button"
-                  onClick={
-                    handleLogout
-                  }
-                  className={`${styles.registerButton} flex-1 justify-center`}
-                  style={{
-                    background:
-                      "#9B1C1C",
-
-                    color:
-                      "#FFFFFF",
-
-                    cursor:
-                      "pointer",
-                  }}
-                >
-                  <LogIn
-                    size={14}
-                    style={{
-                      transform:
-                        "rotate(180deg)",
-                    }}
-                  />
-
-                  {t.logout}
-                </button>
-              )}
+             
             </div>
           </div>
         )}

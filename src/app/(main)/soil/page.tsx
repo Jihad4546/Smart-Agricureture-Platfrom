@@ -1,326 +1,495 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useLanguage } from "../../../contexts/LanguageContext";
-import { 
-  FlaskConical, 
-  Plus, 
-  TestTube, 
-  Thermometer, 
-  Droplet, 
-  Activity, 
-  ShieldAlert, 
-  FileText, 
-  CheckCircle2, 
-  AlertTriangle 
+import {
+  ArrowLeft,
+  Upload,
+  Layers,
+  RotateCcw,
+  Loader2,
+  Sprout,
+  TrendingUp,
+  Droplets,
+  Activity,
+  CheckCircle2,
+  TestTube2,
 } from "lucide-react";
 
-// --- Types Definition ---
-interface SoilReport {
-  id: string;
-  fieldLocation: string;
-  fieldLocationBn: string;
-  sampleDate: string;
-  phLevel: number;
-  nitrogen: string;
-  nitrogenBn: string;
-  phosphorus: string;
-  phosphorusBn: string;
-  potassium: string;
-  potassiumBn: string;
-  moisture: string;
-  moistureBn: string;
-  healthStatus: "Optimal" | "Moderate" | "Needs Attention";
-  healthStatusBn: string;
-  recommendation: string;
-  recommendationBn: string;
-}
-
-// --- Translations Definition ---
 const translations = {
   en: {
-    title: "Soil Analysis & Health",
-    subtitle: "Monitor soil pH, NPK levels, moisture, and get customized fertilizer recommendations.",
-    newTestBtn: "New Soil Test",
-    avgPh: "Average Soil pH",
-    phStatus: "Slightly Acidic (Ideal: 6.0 - 7.0)",
+    backToDashboard: "Back to Dashboard",
+    soilDoctor: "AI Soil Analyzer",
+    uploadTitle: "Upload Soil Image",
+    uploadDesc:
+      "Drag & drop or click to upload a clear photo of your soil for analysis.",
+    analyze: "Analyze Soil",
+    scanning: "AI is analyzing your soil sample...",
+    characteristics: "Observed Characteristics",
+    suitableCrops: "Suitable Crops",
+    soilImprovements: "Soil Improvement Steps",
+    confidence: "Confidence Score",
+    estimatedPh: "Estimated pH",
+    moistureLevel: "Moisture Level",
     organicMatter: "Organic Matter",
-    organicStatus: "Good Condition",
-    moistureLevel: "Soil Moisture",
-    moistureStatus: "Sufficient Water Content",
-    pendingTests: "Pending Reports",
-    pendingStatus: "1 Sample in Lab Analysis",
-    recommendationTitle: "Soil Advisory: Lime Treatment Recommended",
-    recommendationDesc: "Field B (Potato Plot) shows slightly higher acidity. Applying agricultural lime is suggested before next planting.",
-    recentReports: "Recent Soil Test Reports",
-    tabAll: "All Fields",
-    tabAttention: "Needs Attention",
-    fieldLocation: "Field Location",
-    sampleDate: "Sample Date",
-    phLevel: "pH Level",
-    npkStatus: "NPK Balance (N-P-K)",
-    moisture: "Moisture",
-    healthStatus: "Soil Condition",
-    recommendation: "Recommendation",
-    downloadReport: "Download PDF",
-    viewDetails: "View Analysis",
+    soilType: "Soil Type",
+    newScan: "Analyze New Sample",
+    errorUpload: "Please select an image first.",
+    uploading: "Uploading image...",
+    uploadFailed: "Image upload failed. Please try again.",
+    analysisFailed: "AI soil analysis failed. Please try again.",
   },
+
   bn: {
-    title: "মাটি বিশ্লেষণ ও স্বাস্থ্য",
-    subtitle: "মাটির পিএইচ (pH), এনপিকে (NPK) মাত্রা, আর্দ্রতা পর্যবেক্ষণ করুন এবং সার ব্যবহারে সঠিক পরামর্শ পান।",
-    newTestBtn: "নতুন মাটি পরীক্ষা",
-    avgPh: "গড় পিএইচ (pH) মাত্রা",
-    phStatus: "সামান্য এসিডিক (আদর্শ: ৬.০ - ৭.০)",
-    organicMatter: "জৈব পদার্থের পরিমাণ",
-    organicStatus: "উত্তম পর্যায়ে আছে",
-    moistureLevel: "মাটির আর্দ্রতা",
-    moistureStatus: "পর্যাপ্ত পানি বিদ্যমান",
-    pendingTests: "পেন্ডিং রিপোর্ট",
-    pendingStatus: "১ টি নমুনা ল্যাবে রয়েছে",
-    recommendationTitle: "মাটি বিষয়ক পরামর্শ: চুন প্রয়োগের তাগিদ",
-    recommendationDesc: "ব্লক-বি (আলু ক্ষেত) এর মাটিতে এসিডের মাত্রা একটু বেশি। আগামী রোপণের আগে নির্দিষ্ট মাত্রায় কৃষি চুন ব্যবহারের পরামর্শ দেওয়া হচ্ছে।",
-    recentReports: "সাম্প্রতিক মাটি পরীক্ষার রিপোর্টসমূহ",
-    tabAll: "সবগুলো ক্ষেত",
-    tabAttention: "নজরদারি প্রয়োজন",
-    fieldLocation: "ক্ষেতের অবস্থান",
-    sampleDate: "পরীক্ষার তারিখ",
-    phLevel: "পিএইচ (pH) মাত্রা",
-    npkStatus: "এনপিকে (N-P-K) ভারসাম্য",
-    moisture: "আর্দ্রতা",
-    healthStatus: "মাটির অবস্থা",
-    recommendation: "পরামর্শ",
-    downloadReport: "পিডিএফ ডাউনলোড",
-    viewDetails: "বিস্তারিত দেখুন",
-  }
+    backToDashboard: "ড্যাশবোর্ডে ফিরে যান",
+    soilDoctor: "এআই মাটি পরীক্ষক",
+    uploadTitle: "মাটির ছবি আপলোড করুন",
+    uploadDesc:
+      "মাটি পরীক্ষার জন্য মাটির একটি পরিষ্কার ছবি ড্র্যাগ করুন অথবা ক্লিক করে আপলোড করুন।",
+    analyze: "মাটি পরীক্ষা করুন",
+    scanning: "এআই আপনার মাটির নমুনা বিশ্লেষণ করছে...",
+    characteristics: "দেখা যাওয়া বৈশিষ্ট্যসমূহ",
+    suitableCrops: "উপযুক্ত ফসলসমূহ",
+    soilImprovements: "মাটি উন্নতির উপায়",
+    confidence: "নিশ্চয়তার হার",
+    estimatedPh: "আনূমানিক পিএইচ (pH)",
+    moistureLevel: "আর্দ্রতার মাত্রা",
+    organicMatter: "জৈব উপাদান",
+    soilType: "মাটির ধরন",
+    newScan: "নতুন মাটি পরীক্ষা",
+    errorUpload: "দয়া করে প্রথমে একটি ছবি নির্বাচন করুন।",
+    uploading: "ছবি আপলোড হচ্ছে...",
+    uploadFailed: "ছবি আপলোড ব্যর্থ হয়েছে। আবার চেষ্টা করুন।",
+    analysisFailed: "এআই মাটি বিশ্লেষণ ব্যর্থ হয়েছে। আবার চেষ্টা করুন।",
+  },
+} as const;
+
+type SoilResult = {
+  soilType: string;
+  confidence: number | string;
+  estimatedPh: string;
+  moistureLevel: string;
+  organicMatterContent: string;
+  suitableCrops?: string[];
+  soilImprovements?: string[];
+  characteristics?: string[];
 };
 
-// --- Mock Data ---
-const initialReports: SoilReport[] = [
-  {
-    id: "1",
-    fieldLocation: "Block A - Rice Field",
-    fieldLocationBn: "ব্লক এ - ধান ক্ষেত",
-    sampleDate: "10 Feb 2026",
-    phLevel: 6.5,
-    nitrogen: "Optimal",
-    nitrogenBn: "পর্যাপ্ত",
-    phosphorus: "High",
-    phosphorusBn: "বেশি",
-    potassium: "Optimal",
-    potassiumBn: "পর্যাপ্ত",
-    moisture: "42%",
-    moistureBn: "৪২%",
-    healthStatus: "Optimal",
-    healthStatusBn: "সর্বোত্তম",
-    recommendation: "Maintain current organic fertilizer intake.",
-    recommendationBn: "বর্তমান জৈব সার ব্যবহারের মাত্রা বজায় রাখুন।",
-  },
-  {
-    id: "2",
-    fieldLocation: "Block B - Potato Plot",
-    fieldLocationBn: "ব্লক বি - আলু ক্ষেত",
-    sampleDate: "02 Feb 2026",
-    phLevel: 5.4,
-    nitrogen: "Low",
-    nitrogenBn: "কম",
-    phosphorus: "Optimal",
-    phosphorusBn: "পর্যাপ্ত",
-    potassium: "Low",
-    potassiumBn: "কম",
-    moisture: "28%",
-    moistureBn: "২৮%",
-    healthStatus: "Needs Attention",
-    healthStatusBn: "নজরদারি প্রয়োজন",
-    recommendation: "Add agricultural lime and Nitrogen rich fertilizer.",
-    recommendationBn: "কৃষি চুন এবং নাইট্রোজেন সমৃদ্ধ সার প্রয়োগ করুন।",
-  },
-  {
-    id: "3",
-    fieldLocation: "Block C - Tomato Garden",
-    fieldLocationBn: "ব্লক সি - টমেটো বাগান",
-    sampleDate: "20 Jan 2026",
-    phLevel: 6.8,
-    nitrogen: "Optimal",
-    nitrogenBn: "পর্যাপ্ত",
-    phosphorus: "Optimal",
-    phosphorusBn: "পর্যাপ্ত",
-    potassium: "Optimal",
-    potassiumBn: "পর্যাপ্ত",
-    moisture: "35%",
-    moistureBn: "৩৫%",
-    healthStatus: "Optimal",
-    healthStatusBn: "সর্বোত্তম",
-    recommendation: "Soil structure is ideal for vegetables.",
-    recommendationBn: "মাটির উপাদান সবজি চাষের জন্য চমৎকার।",
-  },
-];
-
-export default function SoilAnalysisPage() {
+export default function SoilDoctorPage() {
+  const router = useRouter();
   const { lang } = useLanguage();
+
   const t = translations[lang];
 
-  const [reports] = useState<SoilReport[]>(initialReports);
-  const [activeTab, setActiveTab] = useState<string>("all");
+  const [image, setImage] = useState<string | null>(null);
+  const [imageUrl, setImageUrl] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const [scanning, setScanning] = useState(false);
+  const [result, setResult] = useState<SoilResult | null>(null);
+  const [error, setError] = useState("");
+
+  // Image upload
+  const handleImageChange = async (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    setError("");
+    setResult(null);
+    setImageUrl("");
+
+    const file = e.target.files?.[0];
+
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      setError("Please select a valid image file.");
+      return;
+    }
+
+    const reader = new FileReader();
+
+    reader.onloadend = () => {
+      const preview = reader.result;
+
+      if (typeof preview === "string") {
+        setImage(preview);
+      } else {
+        setError("Unable to read the selected image.");
+      }
+    };
+
+    reader.readAsDataURL(file);
+
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+
+    if (!cloudName || !uploadPreset) {
+      setError("Cloudinary configuration is missing.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", uploadPreset);
+
+    try {
+      setUploading(true);
+
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.error?.message || "Image upload failed"
+        );
+      }
+
+      const optimizedUrl = data.secure_url.replace(
+        "/upload/",
+        "/upload/f_auto,q_auto,w_800/"
+      );
+
+      setImageUrl(optimizedUrl);
+    } catch (error) {
+      console.error("Cloudinary upload error:", error);
+      setError(t.uploadFailed);
+      setImage(null);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  // AI Soil Analysis
+  const handleAnalyze = async () => {
+    if (!imageUrl) {
+      setError(t.errorUpload);
+      return;
+    }
+
+    try {
+      setScanning(true);
+      setError("");
+      setResult(null);
+
+      const serverUrl = process.env.NEXT_PUBLIC_SERVER_URL;
+
+      if (!serverUrl) {
+        throw new Error("Server URL configuration is missing.");
+      }
+
+      const response = await fetch(`${serverUrl}/api/soil`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          imageUrl,
+          language: lang,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || t.analysisFailed);
+      }
+
+      setResult(data.result);
+    } catch (error) {
+      console.error("AI soil analysis error:", error);
+      setError(
+        error instanceof Error ? error.message : t.analysisFailed
+      );
+    } finally {
+      setScanning(false);
+    }
+  };
+
+  // Reset
+  const resetScan = () => {
+    setImage(null);
+    setImageUrl("");
+    setResult(null);
+    setError("");
+  };
 
   return (
-    <div className="min-h-screen bg-slate-50 p-6 font-sans text-slate-800">
-      {/* Top Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between pb-6 border-b border-slate-200 gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
-            <FlaskConical className="h-7 w-7 text-emerald-600" /> {t.title}
-          </h1>
-          <p className="text-sm text-slate-500 mt-1">
-            {t.subtitle}
-          </p>
-        </div>
-<button className="flex h-11 items-center justify-center gap-2 rounded-xl bg-[#1F3D2B] px-5 text-sm font-semibold text-white transition hover:bg-[#2F5943] shadow-md shadow-green-950/15">
-          <Plus className="h-4 w-4" /> {t.newTestBtn}
+    <div className="min-h-screen bg-[#FAF8F3] px-4 py-8 md:px-8">
+      <div className="mx-auto max-w-3xl">
+        {/* Back Button */}
+        <button
+          onClick={() => router.push("/dashboard")}
+          className="mb-6 flex items-center gap-2 text-sm font-semibold text-[#1F3D2B] transition hover:text-[#2F5943]"
+        >
+          <ArrowLeft size={16} />
+          {t.backToDashboard}
         </button>
-      </div>
 
-      {/* Analytics Overview Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
-          <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase">{t.avgPh}</p>
-            <p className="text-2xl font-bold text-slate-900 mt-1">6.2 pH</p>
-            <p className="text-[11px] text-emerald-600 mt-0.5">{t.phStatus}</p>
+        {/* Page Title */}
+        <div className="mb-8 flex items-center gap-3">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#EAF0E8] text-amber-800">
+            <TestTube2 size={24} />
           </div>
-          <div className="h-10 w-10 bg-emerald-100 rounded-lg flex items-center justify-center text-emerald-600">
-            <TestTube className="h-5 w-5" />
-          </div>
+
+          <h1 className="text-3xl font-bold text-[#16241C]">
+            {t.soilDoctor}
+          </h1>
         </div>
 
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
-          <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase">{t.organicMatter}</p>
-            <p className="text-2xl font-bold text-slate-900 mt-1">{lang === "bn" ? "৩.৮%" : "3.8%"}</p>
-            <p className="text-[11px] text-emerald-600 mt-0.5">{t.organicStatus}</p>
-          </div>
-          <div className="h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center text-blue-600">
-            <Activity className="h-5 w-5" />
-          </div>
-        </div>
+        {/* UPLOAD / SCAN SECTION */}
+        {!result ? (
+          <div className="rounded-3xl border border-[#E4DFD1] bg-white p-6 shadow-sm sm:p-8">
+            {/* Error Message */}
+            {error && (
+              <div className="mb-4 rounded-xl border border-red-200 bg-red-50 p-4 text-xs font-semibold text-red-700">
+                {error}
+              </div>
+            )}
 
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
-          <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase">{t.moistureLevel}</p>
-            <p className="text-2xl font-bold text-slate-900 mt-1">{lang === "bn" ? "৩৫%" : "35%"}</p>
-            <p className="text-[11px] text-cyan-600 mt-0.5">{t.moistureStatus}</p>
-          </div>
-          <div className="h-10 w-10 bg-cyan-100 rounded-lg flex items-center justify-center text-cyan-600">
-            <Droplet className="h-5 w-5" />
-          </div>
-        </div>
+            {/* Scanning State */}
+            {scanning ? (
+              <div className="flex flex-col items-center justify-center py-12 text-center">
+                <div className="relative mb-6 h-44 w-44 overflow-hidden rounded-2xl border border-[#E4DFD1] bg-black/5">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={image || undefined}
+                    alt="Scanning soil"
+                    className="h-full w-full object-cover"
+                  />
+                  <div className="absolute inset-x-0 top-0 h-1 animate-[scan_2s_ease-in-out_infinite] bg-amber-600 shadow-lg shadow-amber-600/50" />
+                </div>
 
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
-          <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase">{t.pendingTests}</p>
-            <p className="text-2xl font-bold text-slate-900 mt-1">{lang === "bn" ? "১ টি" : "1 Field"}</p>
-            <p className="text-[11px] text-amber-600 mt-0.5">{t.pendingStatus}</p>
-          </div>
-          <div className="h-10 w-10 bg-amber-100 rounded-lg flex items-center justify-center text-amber-600">
-            <Thermometer className="h-5 w-5" />
-          </div>
-        </div>
-      </div>
+                <div className="flex items-center gap-2">
+                  <Loader2
+                    size={18}
+                    className="animate-spin text-[#1F3D2B]"
+                  />
+                  <h3 className="text-sm font-bold text-[#1F3D2B]">
+                    {t.scanning}
+                  </h3>
+                </div>
 
-      {/* Soil Advisory Banner */}
-      <div className="mt-6 bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
-        <ShieldAlert className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
-        <div>
-          <h4 className="text-sm font-semibold text-amber-900">{t.recommendationTitle}</h4>
-          <p className="text-xs text-amber-700 mt-0.5">
-            {t.recommendationDesc}
-          </p>
-        </div>
-      </div>
+                <p className="mt-2 text-xs text-[#6B7A6E]">Please wait...</p>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {/* Upload Area */}
+                {!image ? (
+                  <div className="relative flex flex-col items-center justify-center rounded-3xl border-2 border-dashed border-[#E4DFD1] bg-[#FAF8F3]/50 p-8 text-center transition hover:border-[#1F3D2B]/50 hover:bg-[#EAF0E8]/10">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="absolute inset-0 cursor-pointer opacity-0"
+                    />
 
-      {/* Reports Section */}
-      <div className="mt-8">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-slate-900">{t.recentReports}</h2>
-          <div className="flex gap-2 bg-slate-200/60 p-1 rounded-lg text-xs font-medium">
-            <button 
-              onClick={() => setActiveTab("all")}
-              className={`px-3 py-1.5 rounded-md transition ${activeTab === "all" ? "bg-white text-slate-900 shadow-sm" : "text-slate-600"}`}
-            >
-              {t.tabAll}
-            </button>
-            <button 
-              onClick={() => setActiveTab("attention")}
-              className={`px-3 py-1.5 rounded-md transition ${activeTab === "attention" ? "bg-white text-slate-900 shadow-sm" : "text-slate-600"}`}
-            >
-              {t.tabAttention}
-            </button>
+                    <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-[#6B7A6E] shadow-sm">
+                      <Upload size={24} />
+                    </div>
+
+                    <p className="text-sm font-bold text-[#16241C]">
+                      {t.uploadTitle}
+                    </p>
+
+                    <p className="mt-2 max-w-sm text-xs leading-relaxed text-[#6B7A6E]">
+                      {t.uploadDesc}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="relative flex max-h-80 items-center justify-center overflow-hidden rounded-2xl border border-[#E4DFD1] bg-black/5">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={image}
+                      alt="Selected soil sample"
+                      className="max-h-80 object-contain"
+                    />
+
+                    <button
+                      onClick={resetScan}
+                      disabled={uploading || scanning}
+                      className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-xl bg-white/90 text-red-600 shadow shadow-black/10 transition hover:bg-white hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <RotateCcw size={16} />
+                    </button>
+
+                    {uploading && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/40">
+                        <div className="flex items-center gap-2 rounded-xl bg-white px-4 py-3 text-xs font-semibold text-[#1F3D2B] shadow-lg">
+                          <Loader2 size={16} className="animate-spin" />
+                          {t.uploading}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Analyze Button */}
+                <button
+                  onClick={handleAnalyze}
+                  disabled={!imageUrl || uploading}
+                  className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#1F3D2B] text-sm font-semibold text-white shadow-lg shadow-green-900/10 transition hover:bg-[#2F5943] disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  <TestTube2 size={16} />
+                  {uploading ? t.uploading : t.analyze}
+                </button>
+              </div>
+            )}
           </div>
-        </div>
+        ) : (
+          /* RESULT SECTION */
+          <div className="space-y-6">
+            <div className="rounded-3xl border border-[#E4DFD1] bg-white p-6 shadow-sm">
+              {/* Main Info Header */}
+              <div className="flex flex-col justify-between gap-4 border-b border-[#FAF8F3] pb-6 sm:flex-row sm:items-center">
+                <div className="flex items-center gap-3">
+  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#EAF0E8] text-amber-800">
+                    <TestTube2 size={24} />
+                  </div>
 
-        {/* Soil Test Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {reports.map((report) => (
-            <div key={report.id} className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden flex flex-col">
-              <div className="p-5 flex-1">
-                <div className="flex justify-between items-start gap-2">
                   <div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-600 px-2 py-0.5 rounded">
-                      {t.sampleDate}: {report.sampleDate}
+                    <span className="text-[10px] font-semibold uppercase tracking-wider text-[#6B7A6E]">
+                      {t.soilType}
                     </span>
-                    <h3 className="font-bold text-slate-900 text-base mt-1">
-                      {lang === "bn" ? report.fieldLocationBn : report.fieldLocation}
-                    </h3>
-                  </div>
-                  <span className={`text-xs px-2.5 py-1 rounded-full font-medium flex items-center gap-1 shrink-0 ${
-                    report.healthStatus === "Optimal" ? "bg-emerald-50 text-emerald-700 border border-emerald-200" :
-                    "bg-amber-50 text-amber-700 border border-amber-200"
-                  }`}>
-                    {report.healthStatus === "Optimal" ? <CheckCircle2 className="w-3 h-3" /> : <AlertTriangle className="w-3 h-3" />}
-                    {lang === "bn" ? report.healthStatusBn : report.healthStatus}
-                  </span>
-                </div>
-
-                <div className="mt-4 space-y-2 text-xs text-slate-600">
-                  <div className="flex justify-between items-center py-1 border-b border-slate-100">
-                    <span>{t.phLevel}:</span>
-                    <span className={`font-bold ${report.phLevel < 6.0 ? "text-amber-600" : "text-emerald-600"}`}>
-                      {report.phLevel} pH
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center py-1 border-b border-slate-100">
-                    <span>{t.npkStatus}:</span>
-                    <span className="font-semibold text-slate-800">
-                      N: {lang === "bn" ? report.nitrogenBn : report.nitrogen} | P: {lang === "bn" ? report.phosphorusBn : report.phosphorus} | K: {lang === "bn" ? report.potassiumBn : report.potassium}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center py-1 border-b border-slate-100">
-                    <span>{t.moisture}:</span>
-                    <span className="font-semibold text-slate-800">{lang === "bn" ? report.moistureBn : report.moisture}</span>
+                    <h2 className="text-2xl font-bold text-[#16241C]">
+                      {result.soilType}
+                    </h2>
                   </div>
                 </div>
 
-                {/* Recommendation Box */}
-                <div className="mt-4 bg-slate-50 p-3 rounded-lg border border-slate-100 text-xs">
-                  <span className="font-semibold text-slate-700 block mb-1">{t.recommendation}:</span>
-                  <p className="text-slate-600">
-                    {lang === "bn" ? report.recommendationBn : report.recommendation}
+                {/* Confidence */}
+                <div className="rounded-2xl bg-[#EAF0E8] p-4 text-center sm:min-w-[120px]">
+                  <p className="text-[10px] font-semibold uppercase text-[#2F5943]">
+                    {t.confidence}
+                  </p>
+                  <p className="mt-0.5 text-lg font-extrabold text-[#1F3D2B]">
+                    {result.confidence}%
                   </p>
                 </div>
               </div>
 
-              {/* Card Footer Actions */}
-              <div className="bg-slate-50 px-5 py-3 border-t border-slate-100 flex justify-between gap-2">
-                <button className="flex items-center gap-1.5 text-xs text-slate-600 hover:text-emerald-600 font-medium transition">
-                  <FileText className="w-3.5 h-3.5" /> {t.downloadReport}
-                </button>
-                <button className="flex items-center gap-1.5 text-xs text-slate-600 hover:text-blue-600 font-medium transition">
-                  <FlaskConical className="w-3.5 h-3.5" /> {t.viewDetails}
+              {/* Key Indicators Grid */}
+              <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+                <div className="rounded-xl border border-[#E4DFD1]/60 bg-[#FAF8F3] p-4">
+                  <div className="mb-1 flex items-center gap-2 text-amber-700">
+                    <Activity size={16} />
+                    <span className="text-xs font-semibold">{t.estimatedPh}</span>
+                  </div>
+                  <p className="text-base font-bold text-[#16241C]">
+                    {result.estimatedPh}
+                  </p>
+                </div>
+
+                <div className="rounded-xl border border-[#E4DFD1]/60 bg-[#FAF8F3] p-4">
+                  <div className="mb-1 flex items-center gap-2 text-blue-600">
+                    <Droplets size={16} />
+                    <span className="text-xs font-semibold">{t.moistureLevel}</span>
+                  </div>
+                  <p className="text-base font-bold text-[#16241C]">
+                    {result.moistureLevel}
+                  </p>
+                </div>
+
+                <div className="rounded-xl border border-[#E4DFD1]/60 bg-[#FAF8F3] p-4">
+                  <div className="mb-1 flex items-center gap-2 text-emerald-700">
+                    <Sprout size={16} />
+                    <span className="text-xs font-semibold">{t.organicMatter}</span>
+                  </div>
+                  <p className="text-base font-bold text-[#16241C]">
+                    {result.organicMatterContent}
+                  </p>
+                </div>
+              </div>
+
+              {/* Characteristics */}
+              <div className="mt-6">
+                <h3 className="mb-2 text-sm font-semibold uppercase tracking-wider text-[#1F3D2B]">
+                  {t.characteristics}
+                </h3>
+                <div className="rounded-xl border border-[#E4DFD1]/55 bg-[#FAF8F3] p-4">
+                  <ul className="list-disc space-y-2 pl-5">
+                    {Array.isArray(result.characteristics) &&
+                      result.characteristics.map((item, index) => (
+                        <li key={index} className="text-xs text-[#6B7A6E]">
+                          {item}
+                        </li>
+                      ))}
+                  </ul>
+                </div>
+              </div>
+
+              {/* Suitable Crops */}
+              <div className="mt-6">
+                <h3 className="mb-2 text-sm font-semibold uppercase tracking-wider text-[#1F3D2B]">
+                  {t.suitableCrops}
+                </h3>
+                <div className="rounded-xl border border-[#1F3D2B]/10 bg-[#EAF0E8]/40 p-4">
+                  <div className="flex flex-wrap gap-2">
+                    {Array.isArray(result.suitableCrops) &&
+                      result.suitableCrops.map((crop, index) => (
+                        <span
+                          key={index}
+                          className="inline-flex items-center gap-1 rounded-lg bg-white px-3 py-1.5 text-xs font-semibold text-[#1F3D2B] shadow-sm"
+                        >
+                          <CheckCircle2 size={12} className="text-emerald-600" />
+                          {crop}
+                        </span>
+                      ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Soil Improvement Steps */}
+              <div className="mt-6">
+                <h3 className="mb-2 text-sm font-semibold uppercase tracking-wider text-[#1F3D2B]">
+                  {t.soilImprovements}
+                </h3>
+                <div className="rounded-xl border border-amber-200/60 bg-amber-50/30 p-4">
+                  <ul className="list-disc space-y-2 pl-5">
+                    {Array.isArray(result.soilImprovements) &&
+                      result.soilImprovements.map((item, index) => (
+                        <li key={index} className="text-xs text-[#6B7A6E]">
+                          {item}
+                        </li>
+                      ))}
+                  </ul>
+                </div>
+              </div>
+
+              {/* New Scan Button */}
+              <div className="mt-8">
+                <button
+                  onClick={resetScan}
+                  className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#1F3D2B] text-sm font-semibold text-white shadow-md transition hover:bg-[#2F5943]"
+                >
+                  <TrendingUp size={16} />
+                  {t.newScan}
                 </button>
               </div>
             </div>
-          ))}
-        </div>
+          </div>
+        )}
       </div>
+
+      <style jsx>{`
+        @keyframes scan {
+          0% {
+            top: 0%;
+          }
+          50% {
+            top: 95%;
+          }
+          100% {
+            top: 0%;
+          }
+        }
+      `}</style>
     </div>
   );
 }
