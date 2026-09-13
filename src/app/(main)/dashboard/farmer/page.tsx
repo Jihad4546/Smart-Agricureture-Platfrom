@@ -2,8 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getAuthUserClient, logoutUserClient, User } from "../../../lib/auth";
-import { useLanguage } from "../../../contexts/LanguageContext";
+import { getAuthUserClient, logoutUserClient, User } from "../../../../lib/auth";
+import { useLanguage } from "../../../../contexts/LanguageContext";
 import {
   Sprout,
   User as UserIcon,

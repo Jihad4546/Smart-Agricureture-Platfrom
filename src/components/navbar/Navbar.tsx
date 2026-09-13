@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 import {
   getAuthUserClient,
@@ -173,7 +173,7 @@ const menuGroups: MenuGroup[] = [
       {
         bn: "ড্যাশবোর্ড",
         en: "Dashboard",
-        href: "/dashboard",
+        href: "/dashboard/farmer",
       },
     ],
   },
@@ -226,7 +226,7 @@ export default function AgriTechNavbar() {
     useState<User | null>(null);
 
   const router = useRouter();
-
+  const pathname = usePathname();
   const navRef =
     useRef<HTMLElement>(null);
 
@@ -310,6 +310,10 @@ export default function AgriTechNavbar() {
       );
     };
   }, []);
+
+  if (pathname.includes("dashboard")) {
+    return null;
+  }
 
   /* ================================
      CLOSE

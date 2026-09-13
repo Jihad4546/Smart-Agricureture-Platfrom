@@ -1,4 +1,4 @@
-export interface User {
+ export interface User {
   name: string;
   email: string;
   role: "Farmer" | "Admin" | "Expert";
