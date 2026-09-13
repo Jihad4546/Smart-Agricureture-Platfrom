@@ -641,7 +641,7 @@ const handleLogout = async () => {
       <div className="absolute right-0 mt-3 w-56 rounded-2xl border border-white/10 bg-white py-2 shadow-xl">
                     <div className="border-b border-[#2F5943] px-4 py-2">
                       <p className="text-xs font-bold text-slate-600">
-                        {(session.user as typeof session.user & { role?: string }).role ?? "User"} Account
+{(session.user as typeof session.user & { role?: string }).role ?? "User"} {lang === 'bn' ? 'আকাউন্ট': 'Account'}
                       </p>
                       <p className="font-semibold text-slate-600">
                         {session.user.name}
@@ -656,7 +656,7 @@ const handleLogout = async () => {
                       className="flex items-center gap-2 px-4 py-2 text-slate-600"
                     >
                       <MdDashboard />
-                      Dashboard
+                   {lang === 'bn' ? 'ড্যাশবোর্ড' : 'Dashboard'}
                     </Link>
 
                     <button
@@ -665,7 +665,7 @@ const handleLogout = async () => {
               className="flex w-full cursor-pointer items-center gap-2 px-4 py-2 text-red-500 hover:bg-red-500/10"
                     >
                       <FaSignOutAlt />
-                      Logout
+                     {lang === "bn" ? 'লগআউট' : 'Logout'}
                     </button>
                   </div>
                 )}

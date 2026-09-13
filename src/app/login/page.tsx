@@ -1,6 +1,7 @@
 "use client"
 import { authClient } from '@/lib/auth-client';
 import { Button, Card, Form, Input, Label } from '@heroui/react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
@@ -40,8 +41,7 @@ const LoginPage = () => {
 
   return (
     <div className="min-h-screen py-12 px-4 flex items-center justify-center">
-      {/* max-w-md ব্যবহার করে প্রস্থ কমানো হয়েছে এবং প্যাডিং অ্যাডজাস্ট করা হয়েছে */}
-      <Card className="w-full max-w-md border border-[#2F5943] py-6 px-6 sm:px-8 shadow-2xl rounded-2xl">
+    <Card className="w-full max-w-md border border-[#2F5943] py-6 px-6 sm:px-8 shadow-2xl rounded-2xl bg-[#EAF0E8]">
         <h1 className="text-center text-2xl font-black text-[#2F5943] mb-4">LogIn</h1>
         
         <Form onSubmit={onSubmit} className="flex w-full flex-col gap-4">
@@ -88,6 +88,11 @@ const LoginPage = () => {
               {loading ? "Logging In..." : "LogIn"} 
             </Button>
           </div>
+          <div className='flex justify-center items-center gap-1'>
+         <p>Don't Have An Account?</p> 
+         
+            <Link href="/register" className='text-xl cursor-pointer text-[#2F5943]'>Sign Up</Link>
+            </div>
         </Form>
       </Card>
     </div>

@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import { Card, Form, Input, Label, Button } from "@heroui/react"; 
 import { FaCamera, FaEye, FaEyeSlash, FaUser } from "react-icons/fa";
 import { authClient } from "@/lib/auth-client";
+import { uploadImage } from '@/utils/uploadImage';
 
 const SignUp = () => {
     const router = useRouter();
@@ -33,9 +34,6 @@ const SignUp = () => {
         const password = String(formData.get("password") || "");
         const confirmPassword = String(formData.get("confirmPassword") || "");
 
-        const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-        const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET; 
-        let imageUrl = "";
 
         if (password !== confirmPassword) {
             toast.error("Passwords do not match!");
@@ -43,26 +41,10 @@ const SignUp = () => {
             return;
         }
 
+        let imageUrl = "";
         if (imageFile) {
             try {
-                const imgFormData = new FormData();
-                imgFormData.append("file", imageFile);
-                if (uploadPreset) {
-                    imgFormData.append("upload_preset", uploadPreset);
-                }
-
-                const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
-                    method: "POST",
-                    body: imgFormData,
-                });
-
-                const data = await res.json();
-                
-                if (!res.ok) {
-                    throw new Error(data.error?.message || "Upload failed");
-                }
-
-                imageUrl = data.secure_url;
+                imageUrl = await uploadImage(imageFile);
             } catch (error) {
                 console.error("Image upload error:", error);
                 toast.error("Image upload failed!");
@@ -104,7 +86,7 @@ const SignUp = () => {
 
     return (
         <div className="min-h-screen py-12 px-4 flex items-center justify-center">
-            <Card className="w-full max-w-xl border border-[#2F5943] py-8 px-6 sm:px-8 shadow-2xl rounded-2xl">
+<Card className="bg-[#EAF0E8] w-full max-w-xl border border-[#2F5943] py-8 px-6 sm:px-8 shadow-2xl rounded-2xl">
                 <h1 className="text-center text-3xl font-black bg-clip-text text-[#2F5943] mb-2">Sign Up</h1>
                 <p className="text-center text-slate-400 text-sm mb-8">Create an account to start sharing your ideas and collaborating with others.</p>
 
