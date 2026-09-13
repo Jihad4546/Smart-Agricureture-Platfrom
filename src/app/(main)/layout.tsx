@@ -3,6 +3,7 @@ import "../globals.css";
 import AgriTechNavbar from "../../components/navbar/Navbar";
 import BottomNav from "../../components/navbar/BottomNav";
 import { LanguageProvider } from "../../contexts/LanguageContext";
+import { Toaster } from "react-hot-toast";
 
 export const metadata: Metadata = {
   title: "AgriTech | Smart Agriculture Platform",
@@ -19,7 +20,9 @@ export default function MainLayout({
     <LanguageProvider>
       <AgriTechNavbar />
       <main className="pb-16 lg:pb-0">{children}</main>
+      <Toaster position="top-center" />
       <BottomNav />
     </LanguageProvider>
+      
   );
 }
