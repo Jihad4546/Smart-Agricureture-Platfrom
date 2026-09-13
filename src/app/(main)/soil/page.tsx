@@ -21,7 +21,7 @@ import {
 
 const translations = {
   en: {
-    backToDashboard: "Back to Dashboard",
+    backToDashboard: "Back to Home",
     soilDoctor: "AI Soil Analyzer",
     uploadTitle: "Upload Soil Image",
     uploadDesc:
@@ -46,7 +46,7 @@ const translations = {
     viewDetails: "View Details",
   },
   bn: {
-    backToDashboard: "ড্যাশবোর্ডে ফিরে যান",
+    backToDashboard: "হোমে ফিরে যান",
     soilDoctor: "এআই মাটি পরীক্ষক",
     uploadTitle: "মাটির ছবি আপলোড করুন",
     uploadDesc:
@@ -248,7 +248,7 @@ export default function SoilDoctorPage() {
       <div className="mx-auto max-w-7xl">
         {/* Back Button */}
         <button
-          onClick={() => router.push("/dashboard")}
+          onClick={() => router.push("/")}
           className="mb-6 flex items-center gap-2 text-sm font-semibold text-[#1F3D2B] transition hover:text-[#2F5943]"
         >
           <ArrowLeft size={16} />
@@ -500,8 +500,8 @@ export default function SoilDoctorPage() {
           </div>
 
           {/* RIGHT PANEL: History Sidebar (1 Column) */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-8 rounded-3xl border border-[#E4DFD1] bg-white p-6 shadow-sm">
+          <div className="lg:col-span-1 mt-18">
+          <div className="sticky top-8 rounded-3xl border border-[#E4DFD1] bg-white p-6 shadow-sm">
               <div className="mb-4 flex items-center justify-between border-b border-[#FAF8F3] pb-4">
                 <div className="flex items-center gap-2 text-[#16241C]">
                   <History size={20} className="text-[#1F3D2B]" />

@@ -243,7 +243,7 @@ export default function HomePage() {
               </Link>
 
               <Link
-                href="/ai-assistant"
+                href="/disease"
                 className="group inline-flex items-center justify-center gap-2 rounded-xl border border-[#DCD7C9] bg-white/80 px-6 py-3.5 text-sm font-semibold text-[#1F3D2B] no-underline shadow-sm backdrop-blur transition-all duration-200 hover:-translate-y-1 hover:bg-white"
               >
                 <Bot

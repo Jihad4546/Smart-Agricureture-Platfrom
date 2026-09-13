@@ -18,7 +18,7 @@ import {
 
 const translations = {
   en: {
-    backToDashboard: "Back to Dashboard",
+    backToDashboard: "Back to Home",
     diseaseDoctor: "AI Crop Doctor",
     uploadTitle: "Upload Leaf Image",
     uploadDesc:
@@ -41,7 +41,7 @@ const translations = {
   },
 
   bn: {
-    backToDashboard: "ড্যাশবোর্ডে ফিরে যান",
+    backToDashboard: "হোমে ফিরে যান",
     diseaseDoctor: "এআই শস্য ডাক্তার",
     uploadTitle: "ফসলের ছবি আপলোড করুন",
     uploadDesc:
@@ -238,7 +238,7 @@ export default function DiseaseDoctorPage() {
       <div className="mx-auto max-w-7xl">
         {/* Back button */}
         <button
-          onClick={() => router.push("/dashboard")}
+          onClick={() => router.push("/")}
           className="mb-6 flex items-center gap-2 text-sm font-semibold text-[#1F3D2B] transition hover:text-[#2F5943]"
         >
           <ArrowLeft size={16} />
