@@ -64,13 +64,6 @@ export default function AddCropPage() {
   const [stage, setStage] = useState("Vegetative");
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    const user = getAuthUserClient();
-    if (!user) {
-      router.push("/auth/login?redirect=/crops/add");
-    }
-  }, [router]);
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !nameBn || !variety || !plantedDate || !daysToHarvest) {

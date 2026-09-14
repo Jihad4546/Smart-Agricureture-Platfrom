@@ -33,13 +33,13 @@ setIsOpen(false);
     farmer: [
       { name: t.language, icon: <Globe size={14} />, onClick: toggleLanguage },
       { name: lang === 'bn' ? 'হোম' : 'Home', icon: <Home className="w-5 h-5" />, href: '/dashboard/farmer' },
-{ name: lang === 'bn' ? 'চ্যাট' : 'Chat', icon: <MessageCircle className="w-5 h-5" />, href: '/dashboard/farmerChat' },
+{ name: lang === 'bn' ? 'চ্যাট' : 'Chat', icon: <MessageCircle className="w-5 h-5" />, href: '/dashboard/farmerHome' },
  { name: lang === 'bn' ? 'প্রোফাইল' : 'ProfileSettings', icon: <Settings className='w-5 h-5' />, href: '/dashboard/profile' },
     ],
     expert: [
       { name: t.language, icon: <Globe size={14} />, onClick: toggleLanguage },
        { name: lang === 'bn' ? 'হোম' : 'Home', icon: <Home className="w-5 h-5" />, href: '/dashboard/expert' },
-{ name: lang === 'bn' ? 'চ্যাট' : 'Chat', icon: <MessageCircle className="w-5 h-5" />, href: '/dashboard/expertChat' },
+{ name: lang === 'bn' ? 'চ্যাট' : 'Chat', icon: <MessageCircle className="w-5 h-5" />, href: '/dashboard/expertHome' },
  { name: lang === 'bn' ? 'প্রোফাইল' : 'ProfileSettings', icon: <Settings className='w-5 h-5' />, href: '/dashboard/profile' },
     ],
   };

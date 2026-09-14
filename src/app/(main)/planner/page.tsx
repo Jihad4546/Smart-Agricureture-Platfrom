@@ -63,11 +63,6 @@ export default function CropCalendarPage() {
   const [crops, setCrops] = useState<any[]>([]);
 
   useEffect(() => {
-    const user = getAuthUserClient();
-    if (!user) {
-      router.push("/auth/login?redirect=/planner");
-      return;
-    }
 
     try {
       const stored = localStorage.getItem("farmer_crops");

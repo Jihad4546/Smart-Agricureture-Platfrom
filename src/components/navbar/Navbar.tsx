@@ -105,11 +105,6 @@ const menuGroups: MenuGroup[] = [
         en: "Disease Library",
         href: "/knowledge",
       },
-      {
-        bn: "বিশেষজ্ঞ পরামর্শ",
-        en: "Expert Consultation",
-        href: "/ai-assistant",
-      },
     ],
   },
 
@@ -352,9 +347,7 @@ const handleLogout = async () => {
             "blur(16px)",
         }}
       >
-        {/* ================================
-            MAIN NAVBAR
-        ================================= */}
+        {/* MAIN NAVBAR */}
 
         <div
           className="
@@ -425,12 +418,7 @@ const handleLogout = async () => {
             </span>
           </Link>
 
-          {/* ================================
-              DESKTOP MENU
-
-              NO HOME HERE
-              NO DASHBOARD HERE
-          ================================= */}
+          {/* DESKTOP MENU*/}
 
           <div
             className="
@@ -616,7 +604,7 @@ const handleLogout = async () => {
               onClick={toggleLanguage}
               className={styles.actionButton}
             >
-              <Globe size={14} />
+              <Globe size={14}/>
               {t.language}
             </button>
 
