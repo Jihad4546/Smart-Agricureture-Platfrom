@@ -103,7 +103,7 @@ const SignUp = () => {
                                     </div>
                                 )}
                             </div>
-                            <label htmlFor="image" className="absolute bottom-0 right-0 bg-[#2F5943] hover:bg-[#2F5943]/80 text-white p-2 rounded-full cursor-pointer shadow-lg transition">
+<label htmlFor="image" className="absolute bottom-0 right-0 bg-[#2F5943] hover:bg-[#2F5943]/80 text-white p-2 rounded-full cursor-pointer shadow-lg transition">
                                 <FaCamera size={12} />
                             </label>
                         </div>

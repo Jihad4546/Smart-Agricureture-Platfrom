@@ -43,11 +43,6 @@ export default function CartPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const user = getAuthUserClient();
-    if (!user) {
-      router.push("/auth/login?redirect=/cart");
-      return;
-    }
 
     try {
       const stored = localStorage.getItem("farmer_cart");

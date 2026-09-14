@@ -102,7 +102,6 @@ const translations = {
     max: "Max",
     min: "Min",
     uv: "UV",
-    poweredBy: "Powered by",
     selectDistrict: "Select District",
   },
 
@@ -126,7 +125,6 @@ const translations = {
     max: "সর্বোচ্চ",
     min: "সর্বনিম্ন",
     uv: "অতিবেগুনি রশ্মি সূচক",
-    poweredBy: "তথ্য সরবরাহকারী",
     selectDistrict: "জেলা নির্বাচন করুন",
   },
 } as const;

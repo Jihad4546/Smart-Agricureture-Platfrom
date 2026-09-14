@@ -1,6 +1,6 @@
 import React from 'react';
 
-const FarmerPage = () => {
+const FarmerHomePage = () => {
   return (
     <div>
       farmer
@@ -8,4 +8,4 @@ const FarmerPage = () => {
   );
 };
 
-export default FarmerPage;
+export default FarmerHomePage;

@@ -46,12 +46,6 @@ export default function CropsListPage() {
   const t = translations[lang];
 
   useEffect(() => {
-    // Authenticate
-    const user = getAuthUserClient();
-    if (!user) {
-      router.push("/auth/login?redirect=/crops");
-      return;
-    }
 
     try {
       const stored = localStorage.getItem("farmer_crops");

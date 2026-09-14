@@ -1,11 +1,11 @@
 import React from 'react';
 
-const ExpertPage = () => {
+const ExpertHomePage = () => {
     return (
         <div>
-          expert  
+            expert
         </div>
     );
 };
 
-export default ExpertPage;
+export default ExpertHomePage;

@@ -3,26 +3,15 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   ArrowUpDown,
-  CalendarRange,
   ChevronDown,
-  Filter,
   Leaf,
   Plus,
   Search,
-  Sparkles,
   Sprout,
   X,
 } from "lucide-react";
 
-import cropApi from "@/services/cropApi";
-import type {
-  Crop,
-  CropActivity,
-  CropActivityPayload,
-  CropGrowthUpdatePayload,
-  CropPayload,
-  CropSummary as CropSummaryType,
-} from "@/types/crop";
+type CropSummaryType = Record<string, number>;
 
 const STATUS_OPTIONS = [
   "All",
@@ -41,6 +30,54 @@ const STAGE_OPTIONS = [
   "Mature",
   "Harvest",
 ] as const;
+
+type Crop = {
+  id: number;
+  crop_name: string;
+  variety: string;
+  status: (typeof STATUS_OPTIONS)[number];
+  growth_stage: (typeof STAGE_OPTIONS)[number];
+  growth_percentage: number;
+  expected_harvest_date: string;
+  [key: string]: unknown;
+};
+
+type CropActivity = {
+  id: number;
+  activity_type: string;
+  activity_date: string;
+  description: string;
+  quantity: string;
+  notes: string;
+  [key: string]: unknown;
+};
+
+type CropActivityPayload = Omit<CropActivity, "id">;
+
+type CropPayload = Omit<Crop, "id">;
+type CropGrowthUpdatePayload = Partial<Pick<Crop, "growth_stage" | "growth_percentage" | "status">>;
+
+const cropApi = {
+  async request<T>(url: string, options?: RequestInit): Promise<T> {
+    const response = await fetch(`/api/crops${url}`, {
+      ...options,
+      headers: { "Content-Type": "application/json", ...options?.headers },
+    });
+    if (!response.ok) throw new Error("Crop API request failed");
+    return response.json() as Promise<T>;
+  },
+  getSummary: () => cropApi.request<CropSummaryType>("/summary"),
+  getCrops: () => cropApi.request<Crop[]>(""),
+  createCrop: (payload: CropPayload) => cropApi.request<Crop>("", { method: "POST", body: JSON.stringify(payload) }),
+  updateCrop: (id: number, payload: CropPayload) =>
+    cropApi.request<Crop>(`/${id}`, { method: "PUT", body: JSON.stringify(payload) }),
+  deleteCrop: (id: number) => cropApi.request<void>(`/${id}`, { method: "DELETE" }),
+  updateGrowth: (id: number, payload: CropGrowthUpdatePayload) =>
+    cropApi.request<Crop>(`/${id}/growth`, { method: "PATCH", body: JSON.stringify(payload) }),
+  getActivities: (id: number) => cropApi.request<CropActivity[]>(`/${id}/activities`),
+  createActivity: (id: number, payload: CropActivityPayload) =>
+    cropApi.request<CropActivity>(`/${id}/activities`, { method: "POST", body: JSON.stringify(payload) }),
+};
 
 export default function CropManagementPage() {
   const [summary, setSummary] = useState<CropSummaryType | null>(null);
@@ -102,10 +139,6 @@ export default function CropManagementPage() {
   const refreshAll = async () => {
     await Promise.all([loadSummary(), loadCrops()]);
   };
-
-  useEffect(() => {
-    void refreshAll();
-  }, []);
 
   useEffect(() => {
     if (!notice) return;
@@ -267,8 +300,6 @@ export default function CropManagementPage() {
             </button>
           </div>
         </header>
-
-        <CropSummary summary={summary} loading={loadingSummary} error={error} onRetry={() => void refreshAll()} />
 
         <section className="mt-8 rounded-[28px] border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
           <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
