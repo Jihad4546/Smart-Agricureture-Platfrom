@@ -98,28 +98,20 @@ export default function FarmerChat() {
 }, [farmerId, expertId]);     
 
 useEffect(() => {
-  if (!expertId) {
-    return;
-  }
+  if (!expertId) return;
 
   const checkStatus = async () => {
     try {
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_SERVER_URL}/api/users/${expertId}/status`,
-        {
-    cache: "no-store",
-  });
-
+        { cache: "no-store" }
+      );
       const data = await response.json();
-
       if (data.success) {
-        setExpertOnline(data.online);
+        setExpertOnline(Boolean(data.online));
       }
     } catch (error) {
-      console.error(
-        "Failed to check expert status:",
-        error
-      );
+      console.error("Failed to check expert status:", error);
     }
   };
 
