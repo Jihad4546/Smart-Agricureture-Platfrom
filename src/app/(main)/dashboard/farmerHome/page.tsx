@@ -3,6 +3,8 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 type Expert = {
   id: string;
@@ -51,6 +53,11 @@ const FarmerPage = () => {
 
   return (
     <div className="max-w-4xl mx-auto p-6">
+      <Link href={"/"} 
+className="mb-6 flex items-center gap-2 text-sm font-semibold text-[#1F3D2B] transition hover:text-[#2F5943]">
+  <ArrowLeft size={16} />
+  Go Back
+</Link>
       <h1 className="text-2xl font-bold mb-6">
         Available Experts
       </h1>
@@ -96,9 +103,9 @@ const FarmerPage = () => {
                     `/dashboard/farmerChat?expertId=${expert.id}`
                   )
                 }
-                className="bg-green-600 text-white px-4 py-2 rounded-lg ml-2"
+                className="bg-green-600 text-white px-4 py-2 rounded-lg ml-2 cursor-pointer"
               >
-                Start Chat
+                Chat
               </button>
             </div>
           ))}

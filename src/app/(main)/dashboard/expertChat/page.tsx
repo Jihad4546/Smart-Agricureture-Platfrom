@@ -18,6 +18,8 @@ import { useSession } from "@/lib/auth-client";
 import toast from "react-hot-toast";
 import { uploadImage } from "@/utils/uploadImage";
 import { FaPaperclip } from "react-icons/fa";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 type ChatMessage = {
   id?: number;
@@ -33,7 +35,7 @@ export default function ExpertChat() {
   const searchParams = useSearchParams();
 
   const { data: session, isPending } = useSession();
-
+  const [farmerOnline, setFarmerOnline] = useState(false);
   const socketRef = useRef<Socket | null>(null);
 
   const [socketConnected, setSocketConnected] = useState(false);
@@ -46,16 +48,14 @@ export default function ExpertChat() {
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
 
+  const [selectedMessage, setSelectedMessage] =useState<ChatMessage | null>(null);
+
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const farmerId = searchParams.get("farmerId");
 
   const expertId = session?.user?.id;
 
-  const roomId =
-    farmerId && expertId
-      ? [farmerId, expertId]
-          .sort()
-          .join("-")
-      : null;
+  const roomId = farmerId && expertId ? [farmerId, expertId].sort().join("-") : null;
       const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
                  const file = e.target.files?.[0];
                  if (file) {
@@ -90,44 +90,64 @@ export default function ExpertChat() {
         );
       }
     } catch (error) {
-      console.error(
-        "Failed to load messages:",
-        error
-      );
+      console.error( "Failed to load messages:", error);
     }
   };
 
   fetchMessages();
 }, [farmerId, expertId]);     
 
-  useEffect(() => {
-    if (!farmerId || !expertId || !roomId) {
-      return;
-    }
-
-    const newSocket = io(
-      process.env.NEXT_PUBLIC_SOCKET_URL
-    );
-
-    socketRef.current = newSocket;
-
-    newSocket.on(
-  "receive_message",
-  (data) => {
-    setMessages((prev) => {
-      const exists = prev.some(
-        (msg) => msg.id === data.id
-      );
-
-      if (exists) {
-        return prev;
-      }
-
-      return [...prev, data];
-    });
+useEffect(() => {
+  if (!farmerId) {
+    return;
   }
-);
-    newSocket.on("connect", () => {
+
+  const checkStatus = async () => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/users/${farmerId}/status`,
+        {
+    cache: "no-store",
+  });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setFarmerOnline(data.online);
+      }
+    } catch (error) {
+      console.error(
+        "Failed to check user status:",
+        error
+      );
+    }
+  };
+
+  checkStatus();
+}, [farmerId]);
+
+
+  useEffect(() => {
+
+  if (
+    !farmerId ||
+    !expertId ||
+    !roomId
+  ) {
+    return;
+  }
+
+  const newSocket = io(
+    process.env.NEXT_PUBLIC_SOCKET_URL
+  );
+
+  socketRef.current =
+    newSocket;
+
+  newSocket.on(
+    "connect",
+    () => {
+
       setSocketConnected(true);
 
       console.log(
@@ -135,41 +155,97 @@ export default function ExpertChat() {
         newSocket.id
       );
 
-      console.log(
-        "Expert ID:",
-        expertId
+      newSocket.emit(
+        "join_room",
+        {
+          roomId,
+          farmerId,
+          expertId,
+          userId: expertId,
+          role: "expert",
+        }
       );
 
-      console.log(
-        "Farmer ID:",
-        farmerId
-      );
+    }
+  );
+
+  newSocket.on(
+    "user_status",
+    (data) => {
 
       console.log(
-        "Room ID:",
-        roomId
+        "User status:",
+        data
       );
 
-      newSocket.emit("join_room", {
-  roomId,
-  farmerId,
-  expertId,
-});
+      if (
+        data.userId === farmerId
+      ) {
+
+        setFarmerOnline(
+          data.status === "online"
+        );
+
+      }
     });
 
-    newSocket.on("disconnect", () => {
+  newSocket.on(
+    "receive_message",
+    (data) => {
+      setMessages(
+        (prev) => {
+          const exists =
+            prev.some(
+              (msg) =>
+                msg.id === data.id
+            );
+
+          if (exists) {
+            return prev;
+          }
+          return [
+            ...prev,
+            data,
+          ];
+        });});
+
+  newSocket.on(
+    "message_deleted",
+    (data) => {
+
+      setMessages(
+        (prev) =>
+          prev.filter(
+            (msg) =>
+              msg.id !==
+              data.messageId
+          ));
+    });
+
+  newSocket.on(
+    "disconnect",
+    () => {
+
       setSocketConnected(false);
 
       console.log(
         "Expert disconnected"
       );
-    });
 
-    return () => {
-      socketRef.current = null;
-      newSocket.disconnect();
-    };
-  }, [farmerId, expertId, roomId]);
+    }
+  );
+
+  return () => {
+  console.log("Expert chat socket disconnected");
+  newSocket.disconnect();
+  socketRef.current = null;
+};
+
+}, [
+  farmerId,
+  expertId,
+  roomId,
+]);
 
   const sendMessage = async () => {
   if (!socketRef.current || !roomId || !session?.user?.id) {
@@ -207,7 +283,26 @@ export default function ExpertChat() {
   setImageFile(null);
   setPreview(null);
 };
+const deleteMessage = () => {
+  if (
+    !selectedMessage?.id ||
+    !socketRef.current ||
+    !roomId
+  ) {
+    return;
+  }
 
+  socketRef.current.emit(
+    "delete_message",
+    {
+      messageId: selectedMessage.id,
+      roomId,
+    }
+  );
+
+  setShowDeleteModal(false);
+  setSelectedMessage(null);
+};
   if (isPending) {
     return (
       <div className="p-6">
@@ -234,17 +329,29 @@ export default function ExpertChat() {
 
   return (
     <div className="max-w-2xl mx-auto p-6">
-
+<Link href={"/dashboard/expertHome"} 
+className="mb-6 flex items-center gap-2 text-sm font-semibold text-[#1F3D2B] transition hover:text-[#2F5943]">
+  <ArrowLeft size={16} />
+  Go Back
+</Link>
       <h1 className="text-2xl font-bold mb-6">
         Expert Chat
       </h1>
+<div className="mb-4 flex items-center gap-2 text-sm text-gray-500">
+  <span
+    className={`w-3 h-3 rounded-full ${
+      farmerOnline
+        ? "bg-green-500"
+        : "bg-gray-400"
+    }`}
+  />
 
-      <div className="mb-4 text-sm text-gray-500">
-        Connected:{" "}
-        {socketConnected
-          ? "Online 🟢"
-          : "Connecting..."}
-      </div>
+  <span>
+    {farmerOnline
+      ? "Online"
+      : "Offline"}
+  </span>
+</div>
 
       {/* Messages */}
 
@@ -259,6 +366,12 @@ export default function ExpertChat() {
             (msg) => (
           <div
   key={msg.id}
+  onClick={() => {
+  if (msg.senderId === expertId) {
+    setSelectedMessage(msg);
+    setShowDeleteModal(true);
+  }
+}}
   className={`mb-4 ${
     msg.sender === "expert"
       ? "text-right"
@@ -331,7 +444,7 @@ export default function ExpertChat() {
         setPreview(null);
         setImageFile(null);
       }}
-      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6"
+      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 cursor-pointer"
     >
       ×
     </button>
@@ -366,13 +479,46 @@ export default function ExpertChat() {
         <button
           onClick={sendMessage}
           disabled={!socketConnected}
-          className="bg-blue-600 text-white px-5 py-2 rounded-lg disabled:opacity-50"
+          className="bg-blue-600 text-white px-5 py-2 rounded-lg disabled:opacity-50 cursor-pointer"
         >
           Send
         </button>
 
       </div>
+ {showDeleteModal && selectedMessage && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
 
+    <div className="w-[90%] max-w-sm rounded-xl bg-white p-6 shadow-xl">
+
+      <h2 className="text-lg font-semibold text-gray-900">
+        Delete message?
+      </h2>
+
+      <p className="mt-2 text-sm text-gray-500">
+        Are you sure you want to delete this message?
+      </p>
+
+      <div className="mt-6 flex justify-end gap-3">
+        <button
+          onClick={() => {
+            setShowDeleteModal(false);
+            setSelectedMessage(null);
+          }}
+          className="rounded-lg border px-4 py-2 text-gray-700 cursor-pointer"
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={deleteMessage}
+          className="rounded-lg bg-red-600 px-4 py-2 text-white cursor-pointer"
+        >
+          Delete
+        </button>
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 }

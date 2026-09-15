@@ -239,7 +239,7 @@ export default function DiseaseDoctorPage() {
         {/* Back button */}
         <button
           onClick={() => router.push("/")}
-          className="mb-6 flex items-center gap-2 text-sm font-semibold text-[#1F3D2B] transition hover:text-[#2F5943]"
+  className="mb-6 flex items-center gap-2 text-sm font-semibold text-[#1F3D2B] transition hover:text-[#2F5943]"
         >
           <ArrowLeft size={16} />
           {t.backToDashboard}
