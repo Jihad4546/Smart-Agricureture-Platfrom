@@ -2,6 +2,8 @@
 
 import { authClient, useSession } from "@/lib/auth-client";
 import { uploadImage } from "@/utils/uploadImage";
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 
@@ -156,8 +158,12 @@ console.log("UPLOADED IMAGE:", uploadedImage);
   }
 
   return (
-    <div className="max-w-3xl mx-auto bg-[#EAF0E8] p-8 rounded-xl shadow">
-
+    <div className="max-w-3xl max-h-140 mx-auto bg-[#EAF0E8] p-8 rounded-xl shadow">
+<Link href={"/"} 
+className="mb-6 flex items-center gap-2 text-sm font-semibold text-[#1F3D2B] transition hover:text-[#2F5943]">
+  <ArrowLeft size={16} />
+  Go Back
+</Link>
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
 
@@ -257,6 +263,7 @@ console.log("UPLOADED IMAGE:", uploadedImage);
 
       </div>
     </div>
+  
   );
 };
 

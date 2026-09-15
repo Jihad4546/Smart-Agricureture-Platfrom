@@ -18,6 +18,8 @@ import { useSession } from "@/lib/auth-client";
 import { uploadImage } from "@/utils/uploadImage";
 import toast from "react-hot-toast";
 import { FaPaperclip } from "react-icons/fa";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 type ChatMessage = {
   id?: number;
@@ -33,7 +35,7 @@ export default function FarmerChat() {
   const searchParams = useSearchParams();
 
   const { data: session, isPending } = useSession();
-
+ const [expertOnline, setExpertOnline] = useState(false);
   const socketRef = useRef<Socket | null>(null);
 
   const [preview, setPreview] = useState<string | null>(null);
@@ -45,17 +47,14 @@ export default function FarmerChat() {
   const [message, setMessage] = useState("");
 
   const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [selectedMessage, setSelectedMessage] = useState<ChatMessage | null>(null);
 
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const expertId = searchParams.get("expertId");
 
   const farmerId = session?.user?.id;
 
-  const roomId =
-    farmerId && expertId
-      ? [farmerId, expertId]
-          .sort()
-          .join("-")
-      : null;
+  const roomId = farmerId && expertId ? [farmerId, expertId].sort().join("-"): null;
  
    const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
            const file = e.target.files?.[0];
@@ -91,15 +90,41 @@ export default function FarmerChat() {
         );
       }
     } catch (error) {
-      console.error(
-        "Failed to load messages:",
-        error
-      );
+      console.error("Failed to load messages:", error);
     }
   };
 
   fetchMessages();
 }, [farmerId, expertId]);     
+
+useEffect(() => {
+  if (!expertId) {
+    return;
+  }
+
+  const checkStatus = async () => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_SERVER_URL}/api/users/${expertId}/status`,
+        {
+    cache: "no-store",
+  });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setExpertOnline(data.online);
+      }
+    } catch (error) {
+      console.error(
+        "Failed to check expert status:",
+        error
+      );
+    }
+  };
+
+  checkStatus();
+}, [expertId]);
 
  useEffect(() => {
   if (
@@ -110,34 +135,20 @@ export default function FarmerChat() {
     return;
   }
 
-  const newSocket = io(
-    process.env.NEXT_PUBLIC_SOCKET_URL
-  );
+  const newSocket = io(process.env.NEXT_PUBLIC_SOCKET_URL);
 
   socketRef.current = newSocket;
 
   newSocket.on("connect", () => {
     setSocketConnected(true);
 
-    console.log(
-      "Farmer connected:",
-      newSocket.id
-    );
+    console.log("Farmer connected:", newSocket.id);
 
-    console.log(
-      "Farmer ID:",
-      farmerId
-    );
+    console.log("Farmer ID:", farmerId);
 
-    console.log(
-      "Expert ID:",
-      expertId
-    );
+    console.log("Expert ID:", expertId);
 
-    console.log(
-      "Room ID:",
-      roomId
-    );
+    console.log("Room ID:", roomId);
 
     newSocket.emit(
       "join_room",
@@ -145,10 +156,29 @@ export default function FarmerChat() {
         roomId,
         farmerId,
         expertId,
+        userId: farmerId,
+        role: "farmer",
       }
     );
   });
 
+newSocket.on(
+  "user_status",
+  (data) => {
+
+    console.log(
+      "User status:",
+      data
+    );
+    if (
+      data.userId === expertId
+    ) {
+      setExpertOnline(
+        data.status === "online"
+      );
+    }
+  }
+);
   newSocket.on(
     "receive_message",
     (data) => {
@@ -174,17 +204,23 @@ export default function FarmerChat() {
       });
     }
   );
-
+ newSocket.on(
+  "message_deleted",
+  (data) => {
+    setMessages((prev) =>
+      prev.filter(
+        (msg) => msg.id !== data.messageId
+      )
+    );
+  }
+);
   newSocket.on(
     "disconnect",
     () => {
       setSocketConnected(false);
 
-      console.log(
-        "Farmer disconnected"
-      );
-    }
-  );
+      console.log("Farmer disconnected");
+    });
 
   return () => {
     socketRef.current = null;
@@ -248,7 +284,26 @@ export default function FarmerChat() {
   setImageFile(null);
   setPreview(null);
 };
+const deleteMessage = () => {
+  if (
+    !selectedMessage?.id ||
+    !socketRef.current ||
+    !roomId
+  ) {
+    return;
+  }
 
+  socketRef.current.emit(
+    "delete_message",
+    {
+      messageId: selectedMessage.id,
+      roomId,
+    }
+  );
+
+  setShowDeleteModal(false);
+  setSelectedMessage(null);
+};
   if (isPending) {
     return (
       <div className="p-6">
@@ -275,17 +330,29 @@ export default function FarmerChat() {
 
   return (
     <div className="max-w-2xl mx-auto p-6">
-
+<Link href={"/dashboard/farmerHome"} 
+className="mb-6 flex items-center gap-2 text-sm font-semibold text-[#1F3D2B] transition hover:text-[#2F5943]">
+  <ArrowLeft size={16} />
+  Go Back
+</Link>
       <h1 className="text-2xl font-bold mb-6">
         Farmer Chat
       </h1>
+<div className="mb-4 flex items-center gap-2 text-sm text-gray-500">
+  <span
+    className={`w-3 h-3 rounded-full ${
+      expertOnline
+        ? "bg-green-500"
+        : "bg-gray-400"
+    }`}
+  />
 
-      <div className="mb-4 text-sm text-gray-500">
-        Connected:{" "}
-        {socketConnected
-          ? "Online 🟢"
-          : "Connecting..."}
-      </div>
+  <span>
+    {expertOnline
+      ? "Online"
+      : "Offline"}
+  </span>
+</div>
 
       {/* Messages */}
 
@@ -299,6 +366,12 @@ export default function FarmerChat() {
             (msg) => (
           <div
   key={msg.id}
+  onClick={() => {
+    if (msg.senderId === farmerId) {
+      setSelectedMessage(msg);
+      setShowDeleteModal(true);
+    }
+  }}
   className={`mb-4 ${
     msg.sender === "farmer"
       ? "text-right"
@@ -370,7 +443,7 @@ export default function FarmerChat() {
         setPreview(null);
         setImageFile(null);
       }}
-      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6"
+      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 cursor-pointer"
     >
       ×
     </button>
@@ -406,12 +479,50 @@ export default function FarmerChat() {
                         <button
           onClick={sendMessage}
           disabled={!socketConnected}
-          className="bg-green-600 text-white px-5 py-2 rounded-lg disabled:opacity-50"
+          className="bg-green-600 text-white px-5 py-2 rounded-lg disabled:opacity-50 cursor-pointer"
         >
           Send
         </button>
       </div>
+{showDeleteModal && selectedMessage && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+
+    <div className="w-[90%] max-w-sm rounded-xl bg-white p-6 shadow-xl">
+
+      <h2 className="text-lg font-semibold text-gray-900">
+        Delete message?
+      </h2>
+
+      <p className="mt-2 text-sm text-gray-500">
+        Are you sure you want to delete this message?
+      </p>
+
+      <div className="mt-6 flex justify-end gap-3">
+
+        <button
+          onClick={() => {
+            setShowDeleteModal(false);
+            setSelectedMessage(null);
+          }}
+          className="rounded-lg border px-4 py-2 text-gray-700 cursor-pointer"
+        >
+          Cancel
+        </button>
+
+        <button
+          onClick={deleteMessage}
+          className="rounded-lg bg-red-600 px-4 py-2 text-white cursor-pointer"
+        >
+          Delete
+        </button>
+
+      </div>
 
     </div>
+
+  </div>
+)}
+    </div>
+    
   );
 }
