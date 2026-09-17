@@ -43,11 +43,6 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const user = getAuthUserClient();
-    if (!user) {
-      router.push("/auth/login?redirect=/orders");
-      return;
-    }
 
     try {
       const stored = localStorage.getItem("farmer_orders");
