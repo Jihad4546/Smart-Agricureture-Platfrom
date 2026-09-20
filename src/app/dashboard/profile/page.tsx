@@ -1,5 +1,6 @@
 "use client";
 
+import { useLanguage } from "@/contexts/LanguageContext";
 import { authClient, useSession } from "@/lib/auth-client";
 import { uploadImage } from "@/utils/uploadImage";
 import { ArrowLeft } from "lucide-react";
@@ -25,6 +26,8 @@ const ProfilePage = () => {
     email: "",
     image: "",
   });
+
+  const {lang} = useLanguage();
 
 useEffect(() => {
   const loadProfile = async () => {
@@ -162,13 +165,13 @@ console.log("UPLOADED IMAGE:", uploadedImage);
 <Link href={"/"} 
 className="mb-6 flex items-center gap-2 text-sm font-semibold text-[#1F3D2B] transition hover:text-[#2F5943]">
   <ArrowLeft size={16} />
-  Go Back
+  {lang === "bn" ? "ফিরে যান" : "Go Back"}
 </Link>
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
 
         <h2 className="text-3xl font-bold mr-1">
-          My Profile
+          {lang === "bn" ? "আমার প্রোফাইল" : "My Profile"}
         </h2>
 
         {!isEditing ? (
@@ -176,7 +179,7 @@ className="mb-6 flex items-center gap-2 text-sm font-semibold text-[#1F3D2B] tra
             onClick={() => setIsEditing(true)}
             className="bg-red-600 text-white px-5 py-2 rounded-lg cursor-pointer"
           >
-            Edit
+            {lang === "bn" ? "এডিট" : "Edit"}
           </button>
         ) : (
           <button
@@ -184,7 +187,7 @@ className="mb-6 flex items-center gap-2 text-sm font-semibold text-[#1F3D2B] tra
             disabled={saving}
             className="bg-green-600 text-white px-5 py-2 rounded-lg cursor-pointer disabled:opacity-50"
           >
-            {saving ? "Saving..." : "Save"}
+            {saving ? "Saving..." : lang === "bn" ? "সেভ" : "Save"}
           </button>
         )}
 
@@ -212,7 +215,7 @@ className="mb-6 flex items-center gap-2 text-sm font-semibold text-[#1F3D2B] tra
                 htmlFor="image"
     className="absolute bottom-0 right-0 bg-red-600 text-white px-3 py-1 rounded-full cursor-pointer text-sm"
               >
-                Change
+                {lang === "bn" ? "পরিবর্তন" : "Change"}
               </label>
 
               <input
@@ -234,7 +237,7 @@ className="mb-6 flex items-center gap-2 text-sm font-semibold text-[#1F3D2B] tra
         {/* Name */}
         <div>
           <label className="block mb-1 font-medium">
-            Name
+            {lang === "bn" ? "নাম" : "Name"}
           </label>
 
           <input
@@ -250,7 +253,7 @@ className="mb-6 flex items-center gap-2 text-sm font-semibold text-[#1F3D2B] tra
         {/* Email */}
         <div>
           <label className="block mb-1 font-medium">
-            Email
+            {lang === "bn" ? "ইমেইল" : "Email"}
           </label>
 
           <input
@@ -260,7 +263,6 @@ className="mb-6 flex items-center gap-2 text-sm font-semibold text-[#1F3D2B] tra
             className="w-full border rounded-lg p-3"
           />
         </div>
-
       </div>
     </div>
   
