@@ -74,7 +74,7 @@ const menuGroups: MenuGroup[] = [
       {
         bn: "ফসল ক্যালেন্ডার",
         en: "Crop Calendar",
-        href: "/planner",
+        href: "/calender",
       },
     ],
   },
@@ -119,35 +119,8 @@ const menuGroups: MenuGroup[] = [
         en: "Market Prices",
         href: "/marketPrices",
       },
-      {
-        bn: "মার্কেটপ্লেস",
-        en: "Marketplace",
-        href: "/marketplace",
-      },
-      {
-        bn: "পণ্যের বিবরণ",
-        en: "Product Details",
-        href: "/productDetails",
-      },
-      {
-        bn: "কার্ট",
-        en: "Cart",
-        href: "/cart",
-      },
-      {
-        bn: "অর্ডার",
-        en: "Orders",
-        href: "/orders",
-      },
+  
     ],
-  },
-
-  {
-    key: "livestock",
-    bn: "পশুপালন",
-    en: "Livestock",
-    icon: PawPrint,
-    href: "/livestock",
   },
 ];
 
