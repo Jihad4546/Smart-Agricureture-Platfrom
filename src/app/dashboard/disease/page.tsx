@@ -15,10 +15,10 @@ import {
   Clock,
   ChevronRight,
 } from "lucide-react";
+import Link from "next/link";
 
 const translations = {
   en: {
-    backToDashboard: "Back to Home",
     diseaseDoctor: "AI Crop Doctor",
     uploadTitle: "Upload Leaf Image",
     uploadDesc:
@@ -41,7 +41,6 @@ const translations = {
   },
 
   bn: {
-    backToDashboard: "হোমে ফিরে যান",
     diseaseDoctor: "এআই শস্য ডাক্তার",
     uploadTitle: "ফসলের ছবি আপলোড করুন",
     uploadDesc:
@@ -208,7 +207,7 @@ export default function DiseaseDoctorPage() {
       }
 
       setResult(data.result);
-      fetchHistory(); // Refresh history after new scan
+      fetchHistory(); 
     } catch (error) {
       setError(
         error instanceof Error ? error.message : t.diagnosisFailed
@@ -237,14 +236,13 @@ export default function DiseaseDoctorPage() {
     <div className="min-h-screen bg-[#FAF8F3] px-4 py-8 md:px-8">
       <div className="mx-auto max-w-7xl">
         {/* Back button */}
-        <button
-          onClick={() => router.push("/")}
-  className="mb-6 flex items-center gap-2 text-sm font-semibold text-[#1F3D2B] transition hover:text-[#2F5943]"
-        >
-          <ArrowLeft size={16} />
-          {t.backToDashboard}
-        </button>
-
+        <Link
+        href={"/"}
+        className="mb-6 flex items-center gap-2 text-sm font-semibold text-[#1F3D2B] transition hover:text-[#2F5943]"
+      >
+        <ArrowLeft size={16} />
+        {lang === "bn" ? "ফিরে যান" : "Go Back"}
+      </Link>
         {/* Page Title */}
         <div className="mb-8 flex items-center gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-50 text-orange-700">

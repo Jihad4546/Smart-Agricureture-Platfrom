@@ -1,5 +1,6 @@
 "use client";
 
+import { useLanguage } from "@/contexts/LanguageContext";
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 
@@ -26,10 +27,11 @@ export default function MarketPrices() {
       socket.off("market_prices");
     };
   }, []);
-
+   const {lang} = useLanguage();
   return (
     <div>
-      <h2 className="max-w-xl mx-auto mb-4 mt-2 text-emerald-500 text-3xl font-bold">আজকের বাজারদর</h2>
+<h2 className="max-w-xl mx-auto mb-4 mt-2 text-[#2F5943] text-3xl font-bold">
+  {lang === 'bn' ? 'আজকের বাজারদর' : "Today's Market Prices"}</h2>
 
       {prices.map((item) => (
         <div className="max-w-xl mx-auto" key={item.id}>
