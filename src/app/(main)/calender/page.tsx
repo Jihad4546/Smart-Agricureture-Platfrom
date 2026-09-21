@@ -1,198 +1,220 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { useLanguage } from "../../../contexts/LanguageContext";
-import { ArrowLeft, Calendar, Info, Wheat, Sun, CloudRain } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Calendar, Clock, Lightbulb, Search, Sprout, Filter } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
-const translations = {
-  en: {
-    backToDashboard: "Back to Dashboard",
-    cropCalendar: "Crop Calendar",
-    seasonsTitle: "Agricultural Seasons in Bangladesh",
-    activeMapping: "Your Crop Harvest Timeline",
-    sowing: "Sowing / Planting",
-    harvest: "Harvesting",
-    bestCrops: "Recommended Crops",
-    rabiName: "Rabi Season (Winter)",
-    rabiMonths: "November - February",
-    rabiDesc: "Cool, dry weather. Ideal for winter crops, tubers, and oilseeds.",
-    rabiCrops: "Wheat, Potato, Mustard, Lentils, Onion, Winter Vegetables",
-    kharif1Name: "Kharif-1 Season (Summer)",
-    kharif1Months: "March - June",
-    kharif1Desc: "Hot, humid weather with occasional thunderstorms (Nor'westers).",
-    kharif1Crops: "Aus Rice, Jute, Maize, Mungbean, Summer Vegetables",
-    kharif2Name: "Kharif-2 Season (Monsoon)",
-    kharif2Months: "July - October",
-    kharif2Desc: "Wet monsoon season with heavy rainfall. Susceptible to floods.",
-    kharif2Crops: "Aman Rice, Eggplant, Okra, Gourd, Turmeric",
-    noActiveCrops: "No active crops to map. Add crops in Crop Management to track them here!",
-    harvestAlert: (name: string, month: string) => `Your ${name} crop is expected to harvest around ${month}.`,
-    harvestAlertBn: (name: string, month: string) => `আপনার ${name} ফসলটি ${month} এর দিকে কাটার সময় হতে পারে।`,
-  },
-  bn: {
-    backToDashboard: "ড্যাশবোর্ডে ফিরে যান",
-    cropCalendar: "ফসল ক্যালেন্ডার",
-    seasonsTitle: "বাংলাদেশের কৃষি মৌসুমসমূহ",
-    activeMapping: "আপনার ফসলের ফসল কাটার সময়রেখা",
-    sowing: "বপন / রোপণ",
-    harvest: "ফসল সংগ্রহ",
-    bestCrops: "উপযুক্ত ফসলসমূহ",
-    rabiName: "রবি মৌসুম (শীতকাল)",
-    rabiMonths: "নভেম্বর - ফেব্রুয়ারি",
-    rabiDesc: "ঠান্ডা ও শুষ্ক আবহাওয়া। শীতকালীন ফসল, কন্দ এবং তৈলবীজের জন্য আদর্শ।",
-    rabiCrops: "গম, আলু, সরিষা, মসুর ডাল, পেঁয়াজ, শীতকালীন শাকসবজি",
-    kharif1Name: "খরিপ-১ মৌসুম (গ্রীষ্মকাল)",
-    kharif1Months: "মার্চ - জুন",
-    kharif1Desc: "গরম ও আর্দ্র আবহাওয়া এবং মাঝে মাঝে কালবৈশাখী ঝড় সহ বৃষ্টিপাত।",
-    kharif1Crops: "আউশ ধান, পাট, ভুট্টা, মুগ ডাল, গ্রীষ্মকালীন শাকসবজি",
-    kharif2Name: "খরিপ-২ মৌসুম (বর্ষাকাল)",
-    kharif2Months: "জুলাই - অক্টোবর",
-    kharif2Desc: "ভারী বর্ষণ সহ বর্ষা মৌসুম। বন্যা বা জলাবদ্ধতা হতে পারে।",
-    kharif2Crops: "আমন ধান, বেগুন, ঢ্যাঁড়শ, লাউ, হলুদ",
-    noActiveCrops: "কোনো সক্রিয় ফসল নেই। আপনার ফসল দেখতে শস্য ব্যবস্থাপনায় ফসল যোগ করুন!",
-    harvestAlert: (name: string, month: string) => `Your ${name} crop is expected to harvest around ${month}.`,
-    harvestAlertBn: (name: string, month: string) => `আপনার ${name} ফসলটি ${month} এর দিকে কাটার সময় হতে পারে।`,
-  }
-};
+// Crop Type Definition
+interface Crop {
+  id: string;
+  name: { bn: string; en: string };
+  category: { bn: string; en: string };
+  sowing_months: { bn: string; en: string };
+  harvesting_months: { bn: string; en: string };
+  duration_days: string;
+  tips: { bn: string; en: string };
+  icon: string;
+}
 
-export default function CropCalendarPage() {
-  const router = useRouter();
+export default function CalendarPage() {
+  const [crops, setCrops] = useState<Crop[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Filter & Search States
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("All");
+
   const { lang } = useLanguage();
-  const t = translations[lang];
-  const [crops, setCrops] = useState<any[]>([]);
 
   useEffect(() => {
-
-    try {
-      const stored = localStorage.getItem("farmer_crops");
-      if (stored) {
-        setCrops(JSON.parse(stored));
+    const fetchCrops = async () => {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/crop-calendar`);
+        
+        if (!response.ok) {
+          throw new Error("Failed to fetch crop data");
+        }
+        
+        const result = await response.json();
+        if (result.success) {
+          setCrops(result.data);
+        }
+      } catch (err: any) {
+        setError(err.message || "An error occurred");
+      } finally {
+        setLoading(false);
       }
-    } catch (e) {
-      console.error(e);
-    }
-  }, [router]);
+    };
 
-  // Map planting date + days to harvest to a month name
-  const getHarvestMonth = (plantedDateStr: string, daysToHarvest: number) => {
-    if (!plantedDateStr) return "";
-    const date = new Date(plantedDateStr);
-    date.setDate(date.getDate() + daysToHarvest);
-    const options: Intl.DateTimeFormatOptions = { month: "long" };
-    return date.toLocaleDateString(lang === "bn" ? "bn-BD" : "en-US", options);
-  };
+    fetchCrops();
+  }, []);
 
-  const seasons = [
-    {
-      name: t.rabiName,
-      months: t.rabiMonths,
-      desc: t.rabiDesc,
-      crops: t.rabiCrops,
-      icon: Wheat,
-      color: "bg-[#EAF0E8] text-[#1F3D2B]",
-      border: "border-[#1F3D2B]/30",
-    },
-    {
-      name: t.kharif1Name,
-      months: t.kharif1Months,
-      desc: t.kharif1Desc,
-      crops: t.kharif1Crops,
-      icon: Sun,
-      color: "bg-amber-50 text-amber-700",
-      border: "border-amber-200",
-    },
-    {
-      name: t.kharif2Name,
-      months: t.kharif2Months,
-      desc: t.kharif2Desc,
-      crops: t.kharif2Crops,
-      icon: CloudRain,
-      color: "bg-blue-50 text-blue-700",
-      border: "border-blue-200",
-    }
+  // Unique Categories extraction
+  const categories = [
+    "All",
+    ...Array.from(new Set(crops.map((c) => c.category[lang as "bn" | "en"]))),
   ];
 
+  // Filtered Crops Logic
+  const filteredCrops = crops.filter((crop) => {
+    const currentLang = lang as "bn" | "en";
+    const nameMatch = crop.name[currentLang]
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const categoryMatch =
+      selectedCategory === "All" || crop.category[currentLang] === selectedCategory;
+
+    return nameMatch && categoryMatch;
+  });
+
+  if (loading) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-[#2F5943] border-t-transparent"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex min-h-[60vh] flex-col items-center justify-center text-red-500">
+        <p className="text-lg font-semibold">
+          {lang === "bn" ? "ডেটা লোড করতে সমস্যা হয়েছে!" : "Failed to load data!"}
+        </p>
+        <p className="text-sm text-slate-500">{error}</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-[#FAF8F3] px-4 py-8 md:px-8">
-      <div className="mx-auto max-w-5xl">
-        {/* Navigation Link */}
-        <button
-          onClick={() => router.push("/dashboard")}
-          className="mb-6 flex items-center gap-2 text-sm font-semibold text-[#1F3D2B] transition hover:text-[#2F5943]"
-        >
-          <ArrowLeft size={16} />
-          {t.backToDashboard}
-        </button>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+      {/* Header */}
+      <div className="mb-8 text-center sm:text-left">
+        <h1 className="text-2xl sm:text-3xl font-bold text-[#1F3D2B] flex items-center justify-center sm:justify-start gap-2">
+          <Calendar className="text-[#2F5943]" />
+          {lang === "bn" ? "ফসল পঞ্জিকা ও রোপণ সূচি" : "Crop Calendar & Planting Schedule"}
+        </h1>
+        <p className="mt-2 text-sm sm:text-base text-slate-600">
+          {lang === "bn"
+            ? "সঠিক সময়ে ফসল বপন ও কাটার সঠিক নির্দেশনা দেখুন।"
+            : "Find the right time for sowing and harvesting your crops."}
+        </p>
+      </div>
 
-        {/* Page Title */}
-        <div className="mb-8 flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#EAF0E8] text-[#1F3D2B]">
-            <Calendar size={24} />
-          </div>
-          <h1 className="text-3xl font-bold text-[#16241C]">{t.cropCalendar}</h1>
+      {/* Search and Category Filters */}
+      <div className="mb-8 flex flex-col md:flex-row gap-4 justify-between items-stretch md:items-center bg-slate-50 p-4 rounded-2xl border border-slate-200">
+        {/* Search Bar */}
+        <div className="relative flex-1">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+          <input
+            type="text"
+            placeholder={lang === "bn" ? "ফসল দিয়ে খুঁজুন..." : "Search crops..."}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:border-[#2F5943] text-slate-800"
+          />
         </div>
 
-        {/* Dynamic User Crops Mapping */}
-        <div className="mb-8 rounded-3xl border border-[#E4DFD1] bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-bold text-[#16241C] mb-4 flex items-center gap-2">
-            <Info size={18} className="text-[#1F3D2B]" />
-            {t.activeMapping}
-          </h2>
-
-          {crops.length === 0 ? (
-            <p className="text-sm text-[#6B7A6E] italic">{t.noActiveCrops}</p>
-          ) : (
-            <div className="space-y-3">
-              {crops.map((crop) => {
-                const month = getHarvestMonth(crop.plantedDate, crop.daysToHarvest);
-                const name = lang === "bn" ? crop.nameBn || crop.name : crop.name;
-                return (
-                  <div key={crop.id} className="flex items-center gap-3 rounded-xl bg-[#FAF8F3] p-4 text-sm border border-[#E4DFD1]/50">
-                    <Wheat size={18} className="text-[#1F3D2B]" />
-                    <p className="font-medium text-[#16241C]">
-                      {lang === "bn" ? t.harvestAlertBn(name, month) : t.harvestAlert(name, month)}
-                    </p>
-                  </div>
-                );
-              })}
-            </div>
-          )}
+        {/* Category Badges */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0 scrollbar-none">
+          <Filter size={16} className="text-slate-400 shrink-0 hidden sm:block" />
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setSelectedCategory(cat)}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors ${
+                selectedCategory === cat
+                  ? "bg-[#2F5943] text-white"
+                  : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-100"
+              }`}
+            >
+              {cat === "All" ? (lang === "bn" ? "সবগুলো" : "All") : cat}
+            </button>
+          ))}
         </div>
+      </div>
 
-        {/* Agricultural Seasons Details */}
-        <div className="space-y-6">
-          <h2 className="text-xl font-bold text-[#16241C]">{t.seasonsTitle}</h2>
-          
-          <div className="grid gap-6 md:grid-cols-3">
-            {seasons.map((season, idx) => {
-              const Icon = season.icon;
-              return (
-                <div key={idx} className={`rounded-3xl border ${season.border} bg-white p-6 shadow-sm flex flex-col justify-between`}>
-                  <div>
-                    <div className={`flex h-12 w-12 items-center justify-center rounded-2xl ${season.color} mb-4`}>
-                      <Icon size={24} />
+      {/* Grid List */}
+      {filteredCrops.length === 0 ? (
+        <div className="text-center py-12 text-slate-500">
+          <p className="text-base font-medium">
+            {lang === "bn" ? "কোনো ফসল পাওয়া যায়নি!" : "No crops found!"}
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredCrops.map((crop) => (
+            <div
+              key={crop.id}
+              className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col justify-between"
+            >
+              <div>
+                {/* Card Top: Icon, Name & Category */}
+                <div className="flex items-start justify-between gap-3 mb-4">
+                  <div className="flex items-center gap-3">
+                    <span className="text-3xl p-2 bg-slate-100 rounded-xl">
+                      {crop.icon}
+                    </span>
+                    <div>
+                      <h3 className="text-lg font-bold text-slate-800">
+                        {crop.name[lang as "bn" | "en"]}
+                      </h3>
+                      <span className="inline-block text-xs font-semibold text-[#2F5943] bg-[#2F5943]/10 px-2.5 py-0.5 rounded-full mt-1">
+                        {crop.category[lang as "bn" | "en"]}
+                      </span>
                     </div>
-                    <h3 className="text-lg font-bold text-[#16241C]">{season.name}</h3>
-                    <p className="text-xs text-[#C6863A] font-semibold mt-1">{season.months}</p>
-                    <p className="text-xs text-[#6B7A6E] mt-3 leading-relaxed">{season.desc}</p>
-                  </div>
-
-                  <div className="mt-6 border-t border-[#FAF8F3] pt-4">
-                    <p className="text-xs font-semibold text-[#16241C] uppercase tracking-wider mb-2">
-                      {t.bestCrops}
-                    </p>
-                    <p className="text-xs text-[#6B7A6E] leading-relaxed">
-                      {season.crops}
-                    </p>
                   </div>
                 </div>
-              );
-            })}
-          </div>
-        </div>
 
-      </div>
+                {/* Timing Details */}
+                <div className="space-y-3 border-t border-b border-slate-100 py-3 my-3 text-sm">
+                  <div className="flex items-center justify-between text-slate-600">
+                    <span className="flex items-center gap-1.5 text-xs text-slate-500">
+                      <Sprout size={15} className="text-emerald-600" />
+                      {lang === "bn" ? "বপনের সময়:" : "Sowing Time:"}
+                    </span>
+                    <span className="font-semibold text-slate-700 text-right">
+                      {crop.sowing_months[lang as "bn" | "en"]}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between text-slate-600">
+                    <span className="flex items-center gap-1.5 text-xs text-slate-500">
+                      <Calendar size={15} className="text-amber-600" />
+                      {lang === "bn" ? "কাটার সময়:" : "Harvesting Time:"}
+                    </span>
+                    <span className="font-semibold text-slate-700 text-right">
+                      {crop.harvesting_months[lang as "bn" | "en"]}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between text-slate-600">
+                    <span className="flex items-center gap-1.5 text-xs text-slate-500">
+                      <Clock size={15} className="text-blue-600" />
+                      {lang === "bn" ? "সময়কাল:" : "Duration:"}
+                    </span>
+                    <span className="font-semibold text-slate-700">
+                      {crop.duration_days} {lang === "bn" ? "দিন" : "Days"}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Advice / Tips */}
+                <div className="bg-amber-50/60 border border-amber-200/60 rounded-xl p-3 mt-2">
+                  <div className="flex items-center gap-1.5 text-amber-800 font-semibold text-xs mb-1">
+                    <Lightbulb size={14} />
+                    <span>{lang === "bn" ? "পরামর্শ:" : "Tips:"}</span>
+                  </div>
+                  <p className="text-xs text-slate-600 leading-relaxed">
+                    {crop.tips[lang as "bn" | "en"]}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

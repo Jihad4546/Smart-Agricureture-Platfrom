@@ -15,13 +15,12 @@ import {
   CheckCircle2,
   TestTube2,
   History,
-  Calendar,
   ChevronRight,
 } from "lucide-react";
+import Link from "next/link";
 
 const translations = {
   en: {
-    backToDashboard: "Back to Home",
     soilDoctor: "AI Soil Analyzer",
     uploadTitle: "Upload Soil Image",
     uploadDesc:
@@ -46,7 +45,6 @@ const translations = {
     viewDetails: "View Details",
   },
   bn: {
-    backToDashboard: "হোমে ফিরে যান",
     soilDoctor: "এআই মাটি পরীক্ষক",
     uploadTitle: "মাটির ছবি আপলোড করুন",
     uploadDesc:
@@ -86,7 +84,6 @@ type SoilResult = {
 };
 
 export default function SoilDoctorPage() {
-  const router = useRouter();
   const { lang } = useLanguage();
   const t = translations[lang];
 
@@ -247,13 +244,13 @@ export default function SoilDoctorPage() {
     <div className="min-h-screen bg-[#FAF8F3] px-4 py-8 md:px-8">
       <div className="mx-auto max-w-7xl">
         {/* Back Button */}
-        <button
-          onClick={() => router.push("/")}
-          className="mb-6 flex items-center gap-2 text-sm font-semibold text-[#1F3D2B] transition hover:text-[#2F5943]"
-        >
-          <ArrowLeft size={16} />
-          {t.backToDashboard}
-        </button>
+       <Link
+        href={"/"}
+className="mb-6 flex items-center gap-2 text-sm font-semibold text-[#1F3D2B] transition hover:text-[#2F5943]"
+      >
+        <ArrowLeft size={16} />
+        {lang === "bn" ? "ফিরে যান" : "Go Back"}
+      </Link>
 
         {/* Main Grid Layout */}
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
