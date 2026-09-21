@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useLanguage } from "../../contexts/LanguageContext";
+import { useLanguage } from "../contexts/LanguageContext";
 
 import { Sprout, Globe, Home, Calendar, CloudSun, Book, Store } from "lucide-react";
 import { authClient, useSession } from "@/lib/auth-client";
@@ -221,7 +221,7 @@ className="md:hidden flex items-center gap-1 text-xs font-medium cursor-pointer 
 
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="p-2 text-slate-700 hover:text-[#2F5943] transition-colors"
+            className="p-2 text-[#2F5943] transition-colors"
             aria-label="Toggle Menu"
           >
             {menuOpen ? <FaTimes size={20} /> : <FaBars size={20} />}

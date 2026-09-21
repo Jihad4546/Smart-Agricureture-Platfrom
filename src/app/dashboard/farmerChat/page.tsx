@@ -20,6 +20,7 @@ import toast from "react-hot-toast";
 import { FaPaperclip } from "react-icons/fa";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type ChatMessage = {
   id?: number;
@@ -55,7 +56,7 @@ export default function FarmerChat() {
   const farmerId = session?.user?.id;
 
   const roomId = farmerId && expertId ? [farmerId, expertId].sort().join("-"): null;
- 
+  const {lang} = useLanguage();
    const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
            const file = e.target.files?.[0];
            if (file) {
@@ -325,10 +326,10 @@ const deleteMessage = () => {
 <Link href={"/dashboard/farmerHome"} 
 className="mb-6 flex items-center gap-2 text-sm font-semibold text-[#1F3D2B] transition hover:text-[#2F5943]">
   <ArrowLeft size={16} />
-  Go Back
+  {lang === "bn" ? "ফিরে যান" : "Go Back"}
 </Link>
       <h1 className="text-2xl font-bold mb-6">
-        Farmer Chat
+        {lang === 'bn' ? 'কৃষকের বার্তা' : 'Farmer Chat'}
       </h1>
 <div className="mb-4 flex items-center gap-2 text-sm text-gray-500">
   <span
@@ -352,7 +353,7 @@ className="mb-6 flex items-center gap-2 text-sm font-semibold text-[#1F3D2B] tra
 
         {messages.length === 0 ? (
           <p className="text-gray-500">
-            No messages yet
+    {lang === 'bn' ? "এখানে কোন বার্তা নেই" : 'No messages yet'}
           </p>
         ) : (messages.map(
             (msg) => (
@@ -473,7 +474,7 @@ className="mb-6 flex items-center gap-2 text-sm font-semibold text-[#1F3D2B] tra
           disabled={!socketConnected}
           className="bg-green-600 text-white px-5 py-2 rounded-lg disabled:opacity-50 cursor-pointer"
         >
-          Send
+          {lang === 'bn' ? 'পাঠান' : 'Send'}
         </button>
       </div>
 {showDeleteModal && selectedMessage && (
@@ -482,11 +483,11 @@ className="mb-6 flex items-center gap-2 text-sm font-semibold text-[#1F3D2B] tra
     <div className="w-[90%] max-w-sm rounded-xl bg-white p-6 shadow-xl">
 
       <h2 className="text-lg font-semibold text-gray-900">
-        Delete message?
+  {lang === 'bn' ? 'বার্তা মুছতে চান?' : 'Delete message?'}
       </h2>
 
       <p className="mt-2 text-sm text-gray-500">
-        Are you sure you want to delete this message?
+{lang === 'bn' ? 'আপনি কি নিশ্চিতভাবে বার্তাটি মুছতে চান?' : 'Are you sure you want to delete this message?'}
       </p>
 
       <div className="mt-6 flex justify-end gap-3">
@@ -498,23 +499,19 @@ className="mb-6 flex items-center gap-2 text-sm font-semibold text-[#1F3D2B] tra
           }}
           className="rounded-lg border px-4 py-2 text-gray-700 cursor-pointer"
         >
-          Cancel
+  {lang === 'bn' ? 'বাদ দিন' : 'Cancel'}
         </button>
 
         <button
           onClick={deleteMessage}
           className="rounded-lg bg-red-600 px-4 py-2 text-white cursor-pointer"
         >
-          Delete
+          {lang === 'bn' ? 'মুছুন' : 'Delete'}
         </button>
-
       </div>
-
     </div>
-
   </div>
 )}
     </div>
-    
   );
 }

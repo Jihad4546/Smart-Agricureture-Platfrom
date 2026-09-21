@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type Expert = {
   id: string;
@@ -20,6 +21,7 @@ const FarmerPage = () => {
 
   const [experts, setExperts] = useState<Expert[]>([]);
   const [loading, setLoading] = useState(true);
+   const {lang} = useLanguage();
 
   useEffect(() => {
     const fetchExperts = async () => {
@@ -56,10 +58,10 @@ const FarmerPage = () => {
       <Link href={"/"} 
 className="mb-6 flex items-center gap-2 text-sm font-semibold text-[#1F3D2B] transition hover:text-[#2F5943]">
   <ArrowLeft size={16} />
-  Go Back
+  {lang === "bn" ? "ফিরে যান" : "Go Back"}
 </Link>
       <h1 className="text-2xl font-bold mb-6">
-        Available Experts
+       {lang === "bn" ? "উপলব্ধ বিশেষজ্ঞ" : 'Available Experts'}
       </h1>
 
       {loading ? (
@@ -105,7 +107,7 @@ className="mb-6 flex items-center gap-2 text-sm font-semibold text-[#1F3D2B] tra
                 }
                 className="bg-green-600 text-white px-4 py-2 rounded-lg ml-2 cursor-pointer"
               >
-                Chat
+                {lang === 'bn'? 'বার্তা': 'Chat'}
               </button>
             </div>
           ))}
