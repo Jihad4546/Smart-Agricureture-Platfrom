@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useSession } from "@/lib/auth-client";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 type Farmer = {
   id: string;
@@ -16,14 +17,12 @@ type Farmer = {
 const ExpertPage = () => {
   const router = useRouter();
 
-  const { data: session, isPending } =
-    useSession();
+  const { data: session, isPending } = useSession();
 
-  const [farmers, setFarmers] =
-    useState<Farmer[]>([]);
+  const [farmers, setFarmers] = useState<Farmer[]>([]);
 
-  const [loading, setLoading] =
-    useState(true);
+  const [loading, setLoading] = useState(true);
+const {lang} = useLanguage();
 
   useEffect(() => {
     const fetchFarmers = async () => {
@@ -68,10 +67,10 @@ const ExpertPage = () => {
 <Link href={"/"} 
 className="mb-6 flex items-center gap-2 text-sm font-semibold text-[#1F3D2B] transition hover:text-[#2F5943]">
   <ArrowLeft size={16} />
-  Go Back
+  {lang === "bn" ? "ফিরে যান" : "Go Back"}
 </Link>
       <h1 className="text-2xl font-bold mb-6">
-        Farmers
+       {lang === 'bn' ? 'কৃষক' : 'Farmers'}
       </h1>
 
       {loading ? (
@@ -125,7 +124,7 @@ className="mb-6 flex items-center gap-2 text-sm font-semibold text-[#1F3D2B] tra
                 }
                 className="bg-blue-600 text-white px-4 py-2 rounded-lg ml-1 cursor-pointer"
               >
-                Chat
+                {lang === 'bn'? 'বার্তা': 'Chat'}
               </button>
 
             </div>

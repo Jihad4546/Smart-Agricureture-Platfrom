@@ -161,7 +161,7 @@ console.log("UPLOADED IMAGE:", uploadedImage);
   }
 
   return (
-    <div className="max-w-3xl max-h-140 mx-auto bg-[#EAF0E8] p-8 rounded-xl shadow">
+    <div className="max-w-3xl max-h-140 mx-auto bg-[#FAF8F3] p-8 rounded-xl shadow">
 <Link href={"/"} 
 className="mb-6 flex items-center gap-2 text-sm font-semibold text-[#1F3D2B] transition hover:text-[#2F5943]">
   <ArrowLeft size={16} />
@@ -170,7 +170,7 @@ className="mb-6 flex items-center gap-2 text-sm font-semibold text-[#1F3D2B] tra
       {/* Header */}
       <div className="flex justify-between items-center mb-8">
 
-        <h2 className="text-3xl font-bold mr-1">
+        <h2 className="text-3xl font-bold mr-1 text-[#1F3D2B]">
           {lang === "bn" ? "আমার প্রোফাইল" : "My Profile"}
         </h2>
 
@@ -236,7 +236,7 @@ className="mb-6 flex items-center gap-2 text-sm font-semibold text-[#1F3D2B] tra
 
         {/* Name */}
         <div>
-          <label className="block mb-1 font-medium">
+          <label className="block mb-1 font-medium text-[#1F3D2B]">
             {lang === "bn" ? "নাম" : "Name"}
           </label>
 
@@ -252,7 +252,7 @@ className="mb-6 flex items-center gap-2 text-sm font-semibold text-[#1F3D2B] tra
 
         {/* Email */}
         <div>
-          <label className="block mb-1 font-medium">
+          <label className="block mb-1 font-medium text-[#1F3D2B]">
             {lang === "bn" ? "ইমেইল" : "Email"}
           </label>
 
